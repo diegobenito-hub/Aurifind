@@ -31,11 +31,16 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
 @keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
 .content{flex:1;position:relative;overflow:hidden;min-height:0}
 .scanner-view{position:absolute;inset:0;display:flex;flex-direction:column}
-.camera-wrap{position:relative;background:#000;overflow:hidden;flex-shrink:0;height:42%}
+
+/* RISOLTO: Ottimizzazione altezza e posizionamento relativo della fotocamera */
+.camera-wrap{position:relative;background:#000;overflow:hidden;flex-shrink:0;height:42%;width:100%}
 #videoEl{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:none}
-#previewImg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:none}
+#photoContainer{position:absolute;inset:0;width:100%;height:100%;display:none;z-index:3}
+#previewImg{width:100%;height:100%;object-fit:cover;display:block}
+#visualTargetsOverlay{position:absolute;inset:0;pointer-events:none;z-index:4}
 #canvasEl{display:none}
-.cam-placeholder{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;color:var(--muted)}
+
+.cam-placeholder{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;color:var(--muted);z-index:1}
 .cam-placeholder i{font-size:52px;opacity:.3}
 .cam-placeholder p{font-size:13px;opacity:.55;text-align:center;padding:0 36px;line-height:1.5}
 .corner{position:absolute;width:24px;height:24px;border-color:var(--gold);border-style:solid;opacity:.65;pointer-events:none;z-index:2}
@@ -43,7 +48,7 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
 .corner.tr{top:14px;right:14px;border-width:2px 2px 0 0}
 .corner.bl{bottom:14px;left:14px;border-width:0 0 2px 2px}
 .corner.br{bottom:14px;right:14px;border-width:0 2px 2px 0}
-.scan-line{position:absolute;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--gold),transparent);pointer-events:none;z-index:2;display:none}
+.scan-line{position:absolute;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--gold),transparent);pointer-events:none;z-index:5;display:none}
 .scan-line.active{display:block;animation:scanmove 2s linear infinite}
 @keyframes scanmove{0%{top:8%}100%{top:92%}}
 .loading-overlay{position:absolute;inset:0;background:rgba(26,26,24,.9);display:none;flex-direction:column;align-items:center;justify-content:center;gap:14px;z-index:10}
@@ -63,8 +68,6 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
 .icard{background:var(--surface);border:1px solid var(--border);border-radius:9px;padding:10px}
 .icard-lbl{font-size:9px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:3px}
 .icard-val{font-size:12px;color:var(--text);font-weight:500;line-height:1.35}
-
-/* NUOVE SEZIONI PER I TARGET DI SCAVO E DATABASE MINERALOGICO */
 .section-title{font-size:10px;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);margin-bottom:6px;margin-top:4px;display:flex;align-items:center;gap:6px}
 .section-title i{font-size:14px;color:var(--gold)}
 .target-container{display:flex;flex-direction:column;gap:8px}
@@ -76,7 +79,6 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
 .target-pct{font-family:'Share Tech Mono',monospace;font-size:18px;font-weight:700;color:var(--gold);flex-shrink:0}
 .db-card{background:linear-gradient(135deg, var(--surface) 0%, #1e2530 100%);border:1px solid #2e384d;border-radius:11px;padding:12px}
 .db-text{font-size:12px;color:#cbd5e1;line-height:1.45}
-
 .advice-card{background:var(--surface);border:1px solid var(--border);border-radius:9px;padding:12px}
 .advice-list{list-style:none;display:flex;flex-direction:column;gap:6px}
 .advice-list li{font-size:12px;color:var(--text);padding-left:14px;position:relative;line-height:1.4}
@@ -107,7 +109,7 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
 .log-body{flex:1;min-width:0}
 .log-item-pct{font-family:'Share Tech Mono',monospace;font-size:22px}
 .log-item-tier{font-size:10px;color:var(--muted);margin-top:1px}
-.log-item-rock{font-size:12px;color:var(--text);margin-top:4px;line-height:1.3}
+.log-item-rock Dino{font-size:12px;color:var(--text);margin-top:4px;line-height:1.3}
 .log-item-coords{font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--muted);margin-top:4px}
 .log-item-time{font-size:10px;color:var(--muted);white-space:nowrap;text-align:right;align-self:flex-start}
 .scanner-controls{padding:10px 14px;padding-bottom:calc(env(safe-area-inset-bottom,0px) + 10px);background:var(--surface);border-top:1px solid var(--border);display:flex;gap:10px;flex-shrink:0}
@@ -134,9 +136,8 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
 .key-setup .btn-save{width:100%;background:var(--gold);color:#1a1a18;border:none;border-radius:11px;padding:15px;font-size:15px;font-weight:700;font-family:'Barlow',sans-serif;cursor:pointer}
 .key-badge{position:absolute;top:8px;right:18px;font-size:9px;color:var(--muted);font-family:'Share Tech Mono',monospace;cursor:pointer;text-decoration:underline}
 
-/* STILI PER I PIN VISIVI DEI TARGET SULLA FOTO */
-.visual-target{position:absolute;width:26px;height:26px;background:rgba(239,159,39,0.2);border:2px dashed var(--gold);color:var(--gold);border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Share Tech Mono',monospace;font-size:11px;font-weight:700;transform:translate(-50%, -50%);box-shadow:0 0 8px rgba(0,0,0,0.8);animation:pulseTarget 1.5s infinite alternate;z-index:5}
-@keyframes pulseTarget { from{transform:translate(-50%, -50%) scale(1);} to{transform:translate(-50%, -50%) scale(1.15);background:rgba(239,159,39,0.4);} }
+.visual-target{position:absolute;width:28px;height:28px;background:rgba(239,159,39,0.25);border:2px dashed var(--gold);color:var(--gold);border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Share Tech Mono',monospace;font-size:12px;font-weight:700;transform:translate(-50%, -50%);box-shadow:0 0 6px rgba(0,0,0,0.8);animation:pulseTarget 1.5s infinite alternate;z-index:6}
+@keyframes pulseTarget { from{transform:translate(-50%, -50%) scale(1);} to{transform:translate(-50%, -50%) scale(1.15);background:rgba(239,159,39,0.45);} }
 </style>
 </head>
 <body>
@@ -162,10 +163,12 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
       <div class="camera-wrap" id="cameraWrap">
         <video id="videoEl" autoplay playsinline muted webkit-playsinline></video>
         <canvas id="canvasEl"></canvas>
-        <div id="photoContainer" style="position:absolute;inset:0;display:none;">
-            <img id="previewImg" style="width:100%;height:100%;object-fit:cover;" alt="foto"/>
+        
+        <div id="photoContainer">
+            <img id="previewImg" src="" alt="foto_acquisita"/>
             <div id="visualTargetsOverlay"></div>
         </div>
+        
         <div class="cam-placeholder" id="camPlaceholder">
           <i class="ti ti-camera"></i>
           <p>Avvia la fotocamera e inquadra il sito di scavo</p>
@@ -192,8 +195,7 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
         </div>
 
         <div class="section-title"><i class="ti ti-shovel"></i> Micro-Target Consigliati (Inquadratura)</div>
-        <div class="target-container" id="targetContainer">
-           </div>
+        <div class="target-container" id="targetContainer"></div>
 
         <div class="section-title"><i class="ti ti-database"></i> Analisi Storica e Database Locale (GPS)</div>
         <div class="db-card">
@@ -379,6 +381,8 @@ async function captureAndAnalyze(){
   
   if(stream){stream.getTracks().forEach(t=>t.stop());stream=null;}
   v.style.display='none';
+  
+  // RISOLTO: Ora forziamo il contenitore a essere visibile prima dell'inserimento dei mirini grafici
   pi.src='data:image/jpeg;base64,'+b64;
   document.getElementById('photoContainer').style.display='block';
   overlay.innerHTML = ''; 
@@ -388,15 +392,14 @@ async function captureAndAnalyze(){
   document.getElementById('scanLine').classList.add('active');
   document.getElementById('mainBtn').disabled=true;
   
-  const msgs=['Scansione geometrica immagine…','Verifica coordinate nei registri minerari…','Calcolo vettori sedimentari…','Compilazione report…'];
+  const msgs=['Mappatura geometrica…','Interrogazione registri minerari…','Calcolo trappole idrauliche…','Creazione report…'];
   let mi=0;
   const lt=setInterval(()=>{document.getElementById('loadingTxt').textContent=msgs[mi++%msgs.length];},1500);
 
-  const lat=gpsData?gpsData.latitude.toFixed(6):'44.4056'; // Default Liguria/Orba se manca GPS
+  const lat=gpsData?gpsData.latitude.toFixed(6):'44.4056';
   const lon=gpsData?gpsData.longitude.toFixed(6):'8.6322';
   const key=getKey();
 
-  // PROMPT EVOLUTO: CHIEDE DETTAGLI SPAZIALI SULLA FOTO + RECORD STORICI DELLA COORDINATA GPS
   const prompt = `Sei un geologo e ingegnere minerario esperto del territorio italiano.
   L'utente si trova esattamente alle seguenti coordinate GPS: Latitudine ${lat}, Longitudine ${lon}.
   
@@ -442,7 +445,6 @@ async function captureAndAnalyze(){
     
     const json = JSON.parse(textResult);
 
-    // 1. Aggiornamento KPI principali
     document.getElementById('probVal').textContent = json.pct + '%';
     const pBar = document.getElementById('probBar');
     pBar.style.width = json.pct + '%';
@@ -451,16 +453,13 @@ async function captureAndAnalyze(){
     document.getElementById('rockType').textContent = json.rock;
     document.getElementById('geoCtx').textContent = json.geoCtx;
     
-    // 2. Iniezione del Database Geomineralogico Georeferenziato
     document.getElementById('dbText').textContent = json.db_locale || "Nessun dato storico critico registrato per questo esatto punto.";
 
-    // 3. Generazione dei Micro-Target grafici sulla foto e della lista dettagliata
     const targetContainer = document.getElementById('targetContainer');
     targetContainer.innerHTML = '';
     
     if(Array.isArray(json.targets)) {
         json.targets.forEach(tgt => {
-            // Crea il pin grafico sopra l'immagine
             const pin = document.createElement('div');
             pin.className = 'visual-target';
             pin.style.left = tgt.x + '%';
@@ -468,7 +467,6 @@ async function captureAndAnalyze(){
             pin.textContent = tgt.num;
             overlay.appendChild(pin);
 
-            // Crea la riga descrittiva nel pannello inferiore
             const row = document.createElement('div');
             row.className = 'target-row';
             row.innerHTML = `
@@ -479,11 +477,10 @@ async function captureAndAnalyze(){
                 </div>
                 <div class="target-pct">${tgt.pct}%</div>
             `;
-            targetContainer.appendChild(targetContainer.appendChild(row));
+            targetContainer.appendChild(row);
         });
     }
 
-    // 4. Strategia Operativa
     const listEl = document.getElementById('adviceList');
     listEl.innerHTML = '';
     if(Array.isArray(json.advice)){
@@ -496,7 +493,6 @@ async function captureAndAnalyze(){
 
     document.getElementById('resultsPanel').style.display = 'flex';
 
-    // Salva nel Log locale
     const now = new Date();
     const entry = {
       pct: parseInt(json.pct) || 0,
