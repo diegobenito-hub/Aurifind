@@ -401,7 +401,7 @@ async function captureAndAnalyze(){
       method:'POST',
       headers:{'Content-Type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
       body:JSON.stringify({
-        model:'claude-sonnet-4-20250514',max_tokens:800,
+        model:'claude-sonnet-4-6',max_tokens:800,
         system:`Sei un geologo esperto in prospezione aurifera fluviale in Italia, specializzato in zone ofiolitiche degli Appennini Settentrionali (Liguria, Piacenza, Genova), Valle d'Aosta, Alpi Occidentali, corsi d'acqua italiani come Orba, Bormida, Trebbia, Dora Baltea, Scrivia, Aveto. Analizza la foto e le coordinate GPS per stimare la probabilità di oro alluvionale. Considera: roccia/sedimento visibile, minerali indicatori (quarzo, magnetite, granato, cromite, serpentinite, ofioliti), morfologia del corso d'acqua, contesto geologico dalle coordinate. Rispondi SOLO con JSON valido senza markdown: {"probability":50,"rock_type":"descrizione","geo_context":"contesto","tier":"Bassa","recommendations":["r1","r2","r3"],"risk_factors":["f1","f2"]}. Tier: "Bassa"(0-30),"Media"(31-55),"Alta"(56-75),"Eccellente"(76-100).`,
         messages:[{role:'user',content:[
           {type:'image',source:{type:'base64',media_type:'image/jpeg',data:b64}},
