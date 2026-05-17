@@ -210,7 +210,7 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
 <div class="key-setup" id="keySetup" style="display:none">
   <div style="font-size:32px">🔑</div>
   <h2>Gemini API Key</h2>
-  <p>Gratuita su <strong>aistudio.google.com</strong><br>Inizia con <strong>AIza...</strong><br>1500 analisi/giorno gratis</p>
+  <p>Gratuita su <strong>aistudio.google.com</strong><br>Inizia con <strong>AIza...</strong><br>Analisi gratuite disponibili quotidianamente</p>
   <input type="text" id="keyInput" placeholder="AIzaSy..." autocomplete="off" autocorrect="off" spellcheck="false"/>
   <button class="btn-save" onclick="saveKey()">Salva e inizia</button>
 </div>
@@ -343,7 +343,6 @@ async function captureAndAnalyze(){
   const v=document.getElementById('videoEl');
   const cv=document.getElementById('canvasEl');
   const pi=document.getElementById('previewImg');
-  // resize per limitare dimensione
   const maxW=800, maxH=600;
   const ratio=Math.min(maxW/(v.videoWidth||800),maxH/(v.videoHeight||600));
   cv.width=Math.round((v.videoWidth||800)*ratio);
@@ -366,111 +365,4 @@ async function captureAndAnalyze(){
   const acc=gpsData?Math.round(gpsData.accuracy)+'m':'N/A';
   const key=getKey();
 
-  const prompt=`Sei un geologo esperto in prospezione aurifera fluviale in Italia, specializzato in zone ofiolitiche degli Appennini Settentrionali, Valle d'Aosta, Alpi Occidentali, fiumi Orba, Bormida, Trebbia, Dora Baltea, Scrivia, Aveto. Coordinate GPS: lat ${lat}, lon ${lon}, acc ${acc}. Analizza la foto e stima la probabilità di trovare oro alluvionale. Considera: tipo roccia/sedimento visibile, minerali indicatori (quarzo, magnetite, granato, cromite, serpentinite, ofioliti), morfologia corso d'acqua, contesto geologico dalle coordinate. Rispondi SOLO con JSON valido senza markdown: {"probability":50,"rock_type":"descrizione","geo_context":"contesto","tier":"Bassa","recommendations":["r1","r2","r3"],"risk_factors":["f1","f2"]}. Tier: "Bassa"(0-30),"Media"(31-55),"Alta"(56-75),"Eccellente"(76-100).`;
-
-  try{
-    const r=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${key}`,{
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({
-        contents:[{parts:[
-          {inline_data:{mime_type:'image/jpeg',data:b64}},
-          {text:prompt}
-        ]}],
-        generationConfig:{temperature:0.3,maxOutputTokens:2000}
-      })
-    });
-    clearInterval(lt);
-    if(!r.ok){const e=await r.json().catch(()=>({}));throw new Error(e.error?.message||'HTTP '+r.status);}
-    const d=await r.json();
-    const raw=(d.candidates?.[0]?.content?.parts?.[0]?.text||'').replace(/```json|```/g,'').trim();
-    showResults(JSON.parse(raw),lat,lon);
-  }catch(e){
-    clearInterval(lt);
-    document.getElementById('loadingOverlay').classList.remove('show');
-    document.getElementById('scanLine').classList.remove('active');
-    document.getElementById('cameraWrap').style.flex='1';
-    setStatus('Errore: '+e.message,'err');
-    setBtnState('ti-refresh','Riprova');
-    document.getElementById('mainBtn').disabled=false;
-  }
-}
-
-function showResults(result,lat,lon){
-  document.getElementById('loadingOverlay').classList.remove('show');
-  document.getElementById('scanLine').classList.remove('active');
-  document.getElementById('resultsPanel').style.display='flex';
-  const pct=Math.min(100,Math.max(0,Math.round(result.probability)));
-  document.getElementById('probVal').textContent=pct+'%';
-  const bar=document.getElementById('probBar');
-  setTimeout(()=>{bar.style.width=pct+'%';},100);
-  const c=pinColor(pct);
-  bar.style.background='linear-gradient(90deg,#3B6D11,'+c+')';
-  document.getElementById('probTier').innerHTML='<span style="color:'+c+'">'+(result.tier||'')+'</span>';
-  document.getElementById('rockType').textContent=result.rock_type||'—';
-  document.getElementById('geoCtx').textContent=result.geo_context||'—';
-  const list=document.getElementById('adviceList');
-  list.innerHTML='';
-  [...(result.recommendations||[]),...(result.risk_factors||[])].slice(0,6).forEach(r=>{
-    const li=document.createElement('li');li.textContent=r;list.appendChild(li);
-  });
-  const entry={lat,lon,pct,tier:result.tier||'',rock:result.rock_type||'',geo:result.geo_context||'',
-    time:new Date().toTimeString().slice(0,5),date:new Date().toLocaleDateString('it-IT')};
-  sessionLog.unshift(entry);
-  localStorage.setItem('aurifind_log',JSON.stringify(sessionLog.slice(0,100)));
-  if(map)addPin(entry);
-  updateMapStats();
-  setBtnState('ti-camera','Nuova scansione');
-  document.getElementById('mainBtn').disabled=false;
-  appState='done';
-  setStatus('Analisi completata · '+new Date().toLocaleTimeString('it-IT'),'ok');
-}
-
-function renderLog(){
-  const c=document.getElementById('logContent');
-  if(!sessionLog.length){c.innerHTML='<div class="log-empty"><i class="ti ti-list-search" style="font-size:48px;opacity:.25"></i><p style="font-size:13px;opacity:.5;text-align:center">Nessuna scansione ancora.</p></div>';return;}
-  c.innerHTML=`<div class="log-hdr-row"><span class="log-hdr-title">${sessionLog.length} scansioni</span><button class="log-clear" onclick="clearLog()">Cancella tutto</button></div>`
-    +sessionLog.map(e=>{const col=pinColor(e.pct);
-      return `<div class="log-item"><div class="log-bar" style="background:${col}"></div><div class="log-body"><div class="log-item-pct" style="color:${col}">${e.pct}%</div><div class="log-item-tier">${e.tier}</div><div class="log-item-rock">${e.rock}</div><div class="log-item-coords">${e.lat}, ${e.lon}</div></div><div class="log-item-time">${e.date}<br>${e.time}</div></div>`;
-    }).join('')+'<div style="height:8px"></div>';
-}
-
-function clearLog(){
-  if(!confirm('Cancellare tutte le scansioni?'))return;
-  sessionLog=[];localStorage.removeItem('aurifind_log');
-  scanMarkers.forEach(m=>map&&map.removeLayer(m));scanMarkers=[];
-  document.getElementById('mapEmpty').style.display='flex';
-  updateMapStats();renderLog();
-}
-
-function exportGPX(){
-  if(!sessionLog.length){alert('Nessun punto da esportare.');return;}
-  const pts=sessionLog.map(e=>`  <wpt lat="${e.lat}" lon="${e.lon}">\n    <name>${e.pct}% ${e.tier}</name>\n    <desc>${e.rock} | ${e.date} ${e.time}</desc>\n  </wpt>`).join('\n');
-  const gpx=`<?xml version="1.0" encoding="UTF-8"?>\n<gpx version="1.1" creator="AuriFind">\n${pts}\n</gpx>`;
-  const a=document.createElement('a');
-  a.href='data:application/gpx+xml;charset=utf-8,'+encodeURIComponent(gpx);
-  a.download='aurifind_'+new Date().toISOString().slice(0,10)+'.gpx';a.click();
-}
-
-function resetScanner(){
-  if(stream){stream.getTracks().forEach(t=>t.stop());stream=null;}
-  document.getElementById('videoEl').style.display='none';
-  document.getElementById('previewImg').style.display='none';
-  document.getElementById('camPlaceholder').style.display='flex';
-  document.getElementById('cameraWrap').style.flex='1';
-  document.getElementById('resultsPanel').style.display='none';
-  document.getElementById('resetBtn').style.display='none';
-  document.getElementById('loadingOverlay').classList.remove('show');
-  document.getElementById('scanLine').classList.remove('active');
-  setBtnState('ti-camera','Avvia Fotocamera');
-  appState='idle';setStatus('');
-}
-
-function setBtnState(icon,text){
-  document.getElementById('btnIcon').className='ti '+icon;
-  document.getElementById('btnText').textContent=text;
-  document.getElementById('mainBtn').disabled=false;
-}
-</script>
-</body>
-</html>
+  const prompt=`Sei un geologo esperto in prospezione aurifera fluviale in Italia, specializzato in zone ofiolitiche degli Appennini Settentrionali, Valle d'Aosta, Alpi Occidentali, fiumi Orba
