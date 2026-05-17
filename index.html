@@ -89,7 +89,7 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
 .log-hdr-row{display:flex;justify-content:space-between;align-items:center}
 .log-hdr-title{font-size:10px;text-transform:uppercase;letter-spacing:.12em;color:var(--muted)}
 .log-clear{font-size:11px;color:var(--red);cursor:pointer;background:none;border:none;font-family:'Barlow',sans-serif;-webkit-appearance:none}
-.log-item{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px;display:flex;gap:12px;align-items:stretch}
+.log-item{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px;display:flex;gap:12px;align-items:stretch;margin-bottom:8px}
 .log-bar{width:4px;border-radius:2px;flex-shrink:0;min-height:44px}
 .log-body{flex:1;min-width:0}
 .log-item-pct{font-family:'Share Tech Mono',monospace;font-size:22px}
@@ -115,7 +115,6 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
 .status-bar{padding:4px 14px;font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--muted);text-align:center;flex-shrink:0;background:var(--bg);min-height:20px}
 .status-bar.err{color:var(--red)}
 .status-bar.ok{color:var(--green)}
-/* KEY SETUP */
 .key-setup{position:fixed;inset:0;background:rgba(26,26,24,.97);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;padding:32px;z-index:100}
 .key-setup h2{font-size:18px;font-weight:700;color:var(--text);text-align:center}
 .key-setup p{font-size:13px;color:var(--muted);text-align:center;line-height:1.6}
@@ -206,7 +205,6 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
   </div>
 </div>
 
-<!-- KEY SETUP OVERLAY -->
 <div class="key-setup" id="keySetup" style="display:none">
   <div style="font-size:32px">🔑</div>
   <h2>Gemini API Key</h2>
@@ -310,11 +308,16 @@ function updateMapStats(){
 
 function setStatus(msg,type=''){const el=document.getElementById('statusBar');el.textContent=msg;el.className='status-bar'+(type?' '+type:'');}
 
+function setBtnState(icon, text) {
+  document.getElementById('btnIcon').className = 'ti ' + icon;
+  document.getElementById('btnText').textContent = text;
+}
+
 async function handleMain(){
   if(!getKey()){showKeySetup();return;}
   if(appState==='idle')await startCamera();
   else if(appState==='camera')await captureAndAnalyze();
-  else await startCamera();
+  else resetScanner();
 }
 
 async function startCamera(){
@@ -333,6 +336,7 @@ async function startCamera(){
     setBtnState('ti-camera-plus','Scatta e Analizza');
     appState='camera';
     setStatus('Inquadra il sito › premi per analizzare','ok');
+    document.getElementById('mainBtn').disabled=false;
   }catch(e){
     setStatus('Fotocamera non accessibile: '+(e.name||e.message),'err');
     document.getElementById('mainBtn').disabled=false;
@@ -362,7 +366,163 @@ async function captureAndAnalyze(){
 
   const lat=gpsData?gpsData.latitude.toFixed(6):'N/A';
   const lon=gpsData?gpsData.longitude.toFixed(6):'N/A';
-  const acc=gpsData?Math.round(gpsData.accuracy)+'m':'N/A';
   const key=getKey();
 
-  const prompt=`Sei un geologo esperto in prospezione aurifera fluviale in Italia, specializzato in zone ofiolitiche degli Appennini Settentrionali, Valle d'Aosta, Alpi Occidentali, fiumi Orba
+  const prompt=`Sei un geologo esperto in prospezione aurifera fluviale in Italia, specializzato in zone ofiolitiche degli Appennini Settentrionali, Valle d'Aosta, Alpi Occidentali, fiumi Orba e Ticino. 
+  Analizza questa foto di sedimenti fluviali alla ricerca di indicatori di oro (presenza di sabbie nere, magnetite, quarzo, transizioni di corrente). 
+  Restituisci ESCLUSIVAMENTE un oggetto JSON valido con questa struttura esatta, senza testo introduttivo o formattazione markdown (NO blocchi con tre apici):
+  {
+    "pct": 45,
+    "tier": "Probabilità Media",
+    "rock": "Descrizione delle rocce dominanti",
+    "geoCtx": "Contesto geologico rilevato",
+    "advice": ["Consiglio pratico di campionamento 1", "Consiglio 2"]
+  }`;
+
+  try {
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${key}`;
+    
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        contents: [{
+          parts: [
+            { text: prompt },
+            { inlineData: { mimeType: 'image/jpeg', data: b64 } }
+          ]
+        }],
+        generationConfig: {
+          responseMimeType: "application/json"
+        }
+      })
+    });
+
+    clearInterval(lt);
+    document.getElementById('loadingOverlay').classList.remove('show');
+    document.getElementById('scanLine').classList.remove('active');
+    document.getElementById('mainBtn').disabled=false;
+
+    if(!response.ok) {
+      const errRes = await response.json();
+      throw new Error(errRes.error?.message || 'Errore nella risposta del server Google');
+    }
+
+    const resData = await response.json();
+    let textResult = resData.candidates[0].content.parts[0].text;
+
+    textResult = textResult.replace(/```json/g, '').replace(/```/g, '').trim();
+    const json = JSON.parse(textResult);
+
+    document.getElementById('probVal').textContent = json.pct + '%';
+    const pBar = document.getElementById('probBar');
+    pBar.style.width = json.pct + '%';
+    pBar.style.backgroundColor = pinColor(json.pct);
+    document.getElementById('probTier').textContent = json.tier;
+    document.getElementById('rockType').textContent = json.rock;
+    document.getElementById('geoCtx').textContent = json.geoCtx;
+
+    const listEl = document.getElementById('adviceList');
+    listEl.innerHTML = '';
+    if(Array.isArray(json.advice)){
+      json.advice.forEach(adv => {
+        const li = document.createElement('li');
+        li.textContent = adv;
+        listEl.appendChild(li);
+      });
+    }
+
+    document.getElementById('resultsPanel').style.display = 'flex';
+
+    const now = new Date();
+    const entry = {
+      pct: parseInt(json.pct) || 0,
+      tier: json.tier || 'N/A',
+      rock: json.rock || 'N/A',
+      lat: lat,
+      lon: lon,
+      date: now.toLocaleDateString('it-IT'),
+      time: now.toTimeString().slice(0,5)
+    };
+
+    sessionLog.push(entry);
+    localStorage.setItem('aurifind_log', JSON.stringify(sessionLog));
+    
+    if(lat !== 'N/A' && lon !== 'N/A') {
+      addPin(entry);
+      updateMapStats();
+    }
+    
+    renderLog();
+    setBtnState('ti-refresh', 'Nuova Scansione / Reset');
+    appState = 'results';
+    setStatus('Analisi geologica completata con successo ✓', 'ok');
+
+  } catch (error) {
+    clearInterval(lt);
+    document.getElementById('loadingOverlay').classList.remove('show');
+    document.getElementById('scanLine').classList.remove('active');
+    document.getElementById('mainBtn').disabled = false;
+    console.error(error);
+    setStatus('Errore di elaborazione dati: ' + error.message, 'err');
+  }
+}
+
+function resetScanner(){
+  if(stream){stream.getTracks().forEach(t=>t.stop());stream=null;}
+  document.getElementById('videoEl').style.display='none';
+  document.getElementById('previewImg').style.display='none';
+  document.getElementById('camPlaceholder').style.display='flex';
+  document.getElementById('resultsPanel').style.display='none';
+  document.getElementById('cameraWrap').style.flex='0 0 45%';
+  document.getElementById('resetBtn').style.display='none';
+  setBtnState('ti-camera','Avvia Fotocamera');
+  appState='idle';
+  setStatus('Pronto per una nuova scansione.');
+}
+
+function renderLog(){
+  const container=document.getElementById('logContent');
+  if(!sessionLog.length){
+    container.innerHTML=`<div class="log-hdr-row"><span class="log-hdr-title">Registro Scansioni</span></div><div class="log-empty"><i class="ti ti-notes-off" style="font-size:36px;opacity:.3"></i><p style="font-size:12px;opacity:.6;margin-top:6px">Nessuna voce memorizzata</p></div>`;
+    return;
+  }
+  let h=`<div class="log-hdr-row"><span class="log-hdr-title">Scansioni effettuate (${sessionLog.length})</span><button class="log-clear" onclick="clearLog()">Cancella tutto</button></div><div style="height:10px"></div>`;
+  sessionLog.slice().reverse().forEach(e=>{
+    const c=pinColor(e.pct);
+    h+=`<div class="log-item">
+      <div class="log-bar" style="background:${c}"></div>
+      <div class="log-body">
+        <div style="display:flex;justify-content:between;align-items:baseline;gap:6px"><span class="log-item-pct" style="color:${c}">${e.pct}%</span><span class="log-item-tier">${e.tier}</span></div>
+        <div class="log-item-rock">${e.rock}</div>
+        <div class="log-item-coords">${e.lat}, ${e.lon}</div>
+      </div>
+      <div class="log-item-time"><div>${e.date}</div><div style="opacity:.5;margin-top:2px">${e.time}</div></div>
+    </div>`;
+  });
+  container.innerHTML=h;
+}
+
+function clearLog(){
+  if(!confirm('Vuoi cancellare definitivamente tutta la cronologia?'))return;
+  sessionLog=[];localStorage.removeItem('aurifind_log');
+  if(map){scanMarkers.forEach(m=>map.removeLayer(m));scanMarkers=[];document.getElementById('mapEmpty').style.display='flex';}
+  renderLog();updateMapStats();setStatus('Cronologia svuotata');
+}
+
+function exportGPX(){
+  if(!sessionLog.length){alert('Nessun dato da esportare');return;}
+  let gpx=`<?xml version="1.0" encoding="UTF-8"?><gpx version="1.1" creator="AuriFind" xmlns="http://www.topografix.com/GPX/1/1">`;
+  sessionLog.forEach((e,i)=>{
+    if(e.lat==='N/A'||e.lon==='N/A')return;
+    gpx+=`<wpt lat="${e.lat}" lon="${e.lon}"><name>AuriFind #${sessionLog.length-i} (${e.pct}%)</name><desc>${e.tier} - ${e.rock}</desc></wpt>`;
+  });
+  gpx+=`</gpx>`;
+  const blob=new Blob([gpx],{type:'application/gpx+xml'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');a.href=url;a.download=`aurifind_export_${new Date().toISOString().slice(0,10)}.gpx`;
+  document.body.appendChild(a);a.click();document.body.removeChild(a);
+}
+</script>
+</body>
+</html>
