@@ -364,9 +364,9 @@ async function captureAndAnalyze(){
   const v=document.getElementById('videoEl');
   const cv=document.getElementById('canvasEl');
   const pi=document.getElementById('previewImg');
-  cv.width=v.videoWidth||1280; cv.height=v.videoHeight||720;
+  cv.width=Math.min(v.videoWidth,800);cv.height=Math.min(v.videoHeight,600);
   cv.getContext('2d').drawImage(v,0,0);
-  const b64=cv.toDataURL('image/jpeg',.85).split(',')[1];
+  const b64=cv.toDataURL('image/jpeg',.4).split(',')[1];
   if(stream){stream.getTracks().forEach(t=>t.stop());stream=null;}
   v.style.display='none';
   pi.src='data:image/jpeg;base64,'+b64; pi.style.display='block';
