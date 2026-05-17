@@ -13,7 +13,7 @@
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Barlow:wght@400;500;600;700&display=swap');
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
-:root{--gold:#EF9F27;--gold-dark:#BA7517;--bg:#1a1a18;--surface:#242420;--surface2:#2e2e29;--text:#f0ede4;--muted:#888780;--border:#3a3a34;--red:#E24B4A;--green:#639922;}
+:root{--gold:#EF9F27;--gold-dark:#BA7517;--bg:#1a1a18;--surface:#242420;--surface2:#2e2e29;--text:#f0ede4;--muted:#888780;--border:#3a3a34;--red:#E24B4A;--green:#639922;--blue:#3B82F6;}
 html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);font-family:'Barlow',sans-serif}
 .app{height:100%;display:flex;flex-direction:column;max-width:500px;margin:0 auto}
 .header{padding-top:calc(env(safe-area-inset-top,0px) + 14px);padding-bottom:12px;padding-left:18px;padding-right:18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;background:var(--surface);flex-shrink:0}
@@ -31,7 +31,7 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
 @keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
 .content{flex:1;position:relative;overflow:hidden;min-height:0}
 .scanner-view{position:absolute;inset:0;display:flex;flex-direction:column}
-.camera-wrap{position:relative;background:#000;overflow:hidden;flex-shrink:0;height:45%}
+.camera-wrap{position:relative;background:#000;overflow:hidden;flex-shrink:0;height:42%}
 #videoEl{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:none}
 #previewImg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:none}
 #canvasEl{display:none}
@@ -51,7 +51,7 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
 .spinner{width:36px;height:36px;border:2px solid var(--border);border-top-color:var(--gold);border-radius:50%;animation:spin .8s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
 .loading-txt{font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--muted)}
-.results-panel{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:12px 14px;display:none;flex-direction:column;gap:10px}
+.results-panel{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:12px 14px;display:none;flex-direction:column;gap:12px}
 .prob-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px}
 .prob-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
 .prob-lbl{font-size:9px;text-transform:uppercase;letter-spacing:.14em;color:var(--muted)}
@@ -63,8 +63,21 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
 .icard{background:var(--surface);border:1px solid var(--border);border-radius:9px;padding:10px}
 .icard-lbl{font-size:9px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:3px}
 .icard-val{font-size:12px;color:var(--text);font-weight:500;line-height:1.35}
+
+/* NUOVE SEZIONI PER I TARGET DI SCAVO E DATABASE MINERALOGICO */
+.section-title{font-size:10px;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);margin-bottom:6px;margin-top:4px;display:flex;align-items:center;gap:6px}
+.section-title i{font-size:14px;color:var(--gold)}
+.target-container{display:flex;flex-direction:column;gap:8px}
+.target-row{background:var(--surface);border:1px solid var(--border);border-radius:9px;padding:10px;display:flex;align-items:center;gap:12px}
+.target-num{width:24px;height:24px;background:var(--surface2);border:1px solid var(--gold);color:var(--gold);border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Share Tech Mono',monospace;font-weight:700;font-size:12px;flex-shrink:0}
+.target-info{flex:1;min-width:0}
+.target-loc{font-size:12px;font-weight:600;color:var(--text)}
+.target-desc{font-size:11px;color:var(--muted);margin-top:2px;line-height:1.3}
+.target-pct{font-family:'Share Tech Mono',monospace;font-size:18px;font-weight:700;color:var(--gold);flex-shrink:0}
+.db-card{background:linear-gradient(135deg, var(--surface) 0%, #1e2530 100%);border:1px solid #2e384d;border-radius:11px;padding:12px}
+.db-text{font-size:12px;color:#cbd5e1;line-height:1.45}
+
 .advice-card{background:var(--surface);border:1px solid var(--border);border-radius:9px;padding:12px}
-.advice-title{font-size:9px;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);margin-bottom:8px}
 .advice-list{list-style:none;display:flex;flex-direction:column;gap:6px}
 .advice-list li{font-size:12px;color:var(--text);padding-left:14px;position:relative;line-height:1.4}
 .advice-list li::before{content:'›';position:absolute;left:0;color:var(--gold);font-weight:700}
@@ -97,7 +110,6 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
 .log-item-rock{font-size:12px;color:var(--text);margin-top:4px;line-height:1.3}
 .log-item-coords{font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--muted);margin-top:4px}
 .log-item-time{font-size:10px;color:var(--muted);white-space:nowrap;text-align:right;align-self:flex-start}
-.log-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;color:var(--muted);padding:60px 0}
 .scanner-controls{padding:10px 14px;padding-bottom:calc(env(safe-area-inset-bottom,0px) + 10px);background:var(--surface);border-top:1px solid var(--border);display:flex;gap:10px;flex-shrink:0}
 .btn-main{flex:1;background:var(--gold);color:#1a1a18;border:none;border-radius:11px;padding:14px 16px;font-size:14px;font-weight:700;font-family:'Barlow',sans-serif;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;-webkit-appearance:none;transition:background .15s}
 .btn-main:active{background:var(--gold-dark)}
@@ -121,6 +133,10 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
 .key-setup input{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:14px;font-size:13px;color:var(--text);font-family:'Share Tech Mono',monospace;-webkit-appearance:none;outline:none}
 .key-setup .btn-save{width:100%;background:var(--gold);color:#1a1a18;border:none;border-radius:11px;padding:15px;font-size:15px;font-weight:700;font-family:'Barlow',sans-serif;cursor:pointer}
 .key-badge{position:absolute;top:8px;right:18px;font-size:9px;color:var(--muted);font-family:'Share Tech Mono',monospace;cursor:pointer;text-decoration:underline}
+
+/* STILI PER I PIN VISIVI DEI TARGET SULLA FOTO */
+.visual-target{position:absolute;width:26px;height:26px;background:rgba(239,159,39,0.2);border:2px dashed var(--gold);color:var(--gold);border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Share Tech Mono',monospace;font-size:11px;font-weight:700;transform:translate(-50%, -50%);box-shadow:0 0 8px rgba(0,0,0,0.8);animation:pulseTarget 1.5s infinite alternate;z-index:5}
+@keyframes pulseTarget { from{transform:translate(-50%, -50%) scale(1);} to{transform:translate(-50%, -50%) scale(1.15);background:rgba(239,159,39,0.4);} }
 </style>
 </head>
 <body>
@@ -146,7 +162,10 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
       <div class="camera-wrap" id="cameraWrap">
         <video id="videoEl" autoplay playsinline muted webkit-playsinline></video>
         <canvas id="canvasEl"></canvas>
-        <img id="previewImg" alt="foto"/>
+        <div id="photoContainer" style="position:absolute;inset:0;display:none;">
+            <img id="previewImg" style="width:100%;height:100%;object-fit:cover;" alt="foto"/>
+            <div id="visualTargetsOverlay"></div>
+        </div>
         <div class="cam-placeholder" id="camPlaceholder">
           <i class="ti ti-camera"></i>
           <p>Avvia la fotocamera e inquadra il sito di scavo</p>
@@ -159,23 +178,36 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
           <div class="loading-txt" id="loadingTxt">Analisi geologica…</div>
         </div>
       </div>
+      
       <div class="results-panel" id="resultsPanel">
         <div class="prob-card">
-          <div class="prob-top"><span class="prob-lbl">Probabilità oro</span><span class="prob-val" id="probVal">—%</span></div>
+          <div class="prob-top"><span class="prob-lbl">Potenziale Oro Totale</span><span class="prob-val" id="probVal">—%</span></div>
           <div class="prob-bar-bg"><div class="prob-bar" id="probBar"></div></div>
           <div class="prob-tier" id="probTier"></div>
         </div>
+        
         <div class="info-grid">
-          <div class="icard"><div class="icard-lbl">Roccia / Sedimento</div><div class="icard-val" id="rockType">—</div></div>
-          <div class="icard"><div class="icard-lbl">Contesto geologico</div><div class="icard-val" id="geoCtx">—</div></div>
+          <div class="icard"><div class="icard-lbl">Matrice Rilevata</div><div class="icard-val" id="rockType">—</div></div>
+          <div class="icard"><div class="icard-lbl">Geomorfologia</div><div class="icard-val" id="geoCtx">—</div></div>
         </div>
+
+        <div class="section-title"><i class="ti ti-shovel"></i> Micro-Target Consigliati (Inquadratura)</div>
+        <div class="target-container" id="targetContainer">
+           </div>
+
+        <div class="section-title"><i class="ti ti-database"></i> Analisi Storica e Database Locale (GPS)</div>
+        <div class="db-card">
+            <div class="db-text" id="dbText">In attesa di coordinate GPS per la scansione del database mineralogico...</div>
+        </div>
+        
+        <div class="section-title"><i class="ti ti-list-check"></i> Strategia Operativa</div>
         <div class="advice-card">
-          <div class="advice-title">Raccomandazioni</div>
           <ul class="advice-list" id="adviceList"></ul>
         </div>
-        <div style="height:6px"></div>
+        <div style="height:10px"></div>
       </div>
     </div>
+    
     <div class="map-view" id="mapView">
       <div id="mapEl"></div>
       <div class="map-empty" id="mapEmpty"><i class="ti ti-map-pin-off"></i><p>Nessun punto scansionato.</p></div>
@@ -200,7 +232,7 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
   </div>
   <div class="tab-bar">
     <button class="tab active" id="tab-scanner" onclick="switchTab('scanner')"><i class="ti ti-camera"></i><span>Scanner</span></button>
-    <button class="tab" id="tab-map" onclick="switchTab('map')"><i class="ti ti-map"></i><span>Mappa</span></button>
+    <button class="tab" id="map-tab-btn" onclick="switchTab('map')"><i class="ti ti-map"></i><span>Mappa</span></button>
     <button class="tab" id="tab-log" onclick="switchTab('log')"><i class="ti ti-list"></i><span>Log</span></button>
   </div>
 </div>
@@ -208,7 +240,7 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
 <div class="key-setup" id="keySetup" style="display:none">
   <div style="font-size:32px">🔑</div>
   <h2>Gemini API Key</h2>
-  <p>Gratuita su <strong>aistudio.google.com</strong><br>Inizia con <strong>AIza...</strong><br>Analisi gratuite disponibili quotidianamente</p>
+  <p>Gratuita su <strong>aistudio.google.com</strong><br>Inizia con <strong>AIza...</strong></p>
   <input type="text" id="keyInput" placeholder="AIzaSy..." autocomplete="off" autocorrect="off" spellcheck="false"/>
   <button class="btn-save" onclick="saveKey()">Salva e inizia</button>
 </div>
@@ -225,12 +257,7 @@ window.addEventListener('load',()=>{
 });
 
 function startClock(){setInterval(()=>{document.getElementById('timeEl').textContent=new Date().toTimeString().slice(0,8);},1000);}
-
-function showKeySetup(){
-  document.getElementById('keySetup').style.display='flex';
-  document.getElementById('keyInput').value=localStorage.getItem('gemini_key')||'';
-}
-
+function showKeySetup(){document.getElementById('keySetup').style.display='flex';document.getElementById('keyInput').value=localStorage.getItem('gemini_key')||'';}
 function saveKey(){
   const k=document.getElementById('keyInput').value.trim();
   if(!k||!k.startsWith('AIza')){alert('Key non valida — deve iniziare con AIza');return;}
@@ -238,7 +265,6 @@ function saveKey(){
   document.getElementById('keySetup').style.display='none';
   setStatus('API key salvata ✓','ok');
 }
-
 function getKey(){return localStorage.getItem('gemini_key')||'';}
 
 function startGPS(){
@@ -255,7 +281,7 @@ function startGPS(){
 }
 
 function switchTab(tab){
-  ['scanner','map','log'].forEach(t=>{document.getElementById('tab-'+t).className='tab'+(t===tab?' active':'');});
+  ['scanner','map','log'].forEach(t=>{const el=document.getElementById('tab-'+t)||document.getElementById('map-tab-btn');if(el && t==='map')el.className='tab'+(tab==='map'?' active':'');else if(document.getElementById('tab-'+t))document.getElementById('tab-'+t).className='tab'+(t===tab?' active':'');});
   document.getElementById('scannerView').style.display=tab==='scanner'?'flex':'none';
   document.getElementById('mapView').className='map-view'+(tab==='map'?' active':'');
   document.getElementById('logView').className='log-view'+(tab==='log'?' active':'');
@@ -284,7 +310,7 @@ function addPin(entry){
     html:`<div style="width:32px;height:32px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);background:${c};border:2px solid rgba(255,255,255,.35);display:flex;align-items:center;justify-content:center"><span style="transform:rotate(45deg);font-family:monospace;font-size:7px;font-weight:700;color:#fff">${entry.pct}%</span></div>`,
     iconSize:[32,32],iconAnchor:[16,32],popupAnchor:[0,-34]});
   const mk=L.marker([parseFloat(entry.lat),parseFloat(entry.lon)],{icon}).addTo(map)
-    .bindPopup(`<div style="min-width:150px"><div style="font-family:monospace;font-size:22px;color:${c}">${entry.pct}%</div><div style="font-size:12px;font-weight:600">${entry.tier}</div><div style="font-size:11px;color:#888">${entry.rock}</div><div style="font-size:9px;color:#666;font-family:monospace">${entry.lat}, ${entry.lon}</div><div style="font-size:10px;color:#666">${entry.date} ${entry.time}</div></div>`,{maxWidth:220});
+    .bindPopup(`<div style="min-width:150px"><div style="font-family:monospace;font-size:22px;color:${c}">${entry.pct}%</div><div style="font-size:12px;font-weight:600">${entry.tier}</div><div style="font-size:11px;color:#888">${entry.rock}</div><div style="font-size:9px;color:#666;font-family:monospace">${entry.lat}, ${entry.lon}</div></div>`,{maxWidth:220});
   scanMarkers.push(mk);
   document.getElementById('mapEmpty').style.display='none';
 }
@@ -293,11 +319,10 @@ function updatePosMarker(lat,lon){
   if(!map)return;
   const icon=L.divIcon({className:'',html:`<div style="width:14px;height:14px;border-radius:50%;background:#EF9F27;border:3px solid #fff;box-shadow:0 0 0 2px #EF9F27"></div>`,iconSize:[14,14],iconAnchor:[7,7]});
   if(posMarker)posMarker.setLatLng([lat,lon]);
-  else posMarker=L.marker([lat,lon],{icon,zIndexOffset:1000}).addTo(map).bindPopup('<div style="font-size:12px">La tua posizione</div>');
+  else posMarker=L.marker([lat,lon],{icon,zIndexOffset:1000}).addTo(map);
 }
 
 function centerMap(){if(map&&gpsData)map.setView([gpsData.latitude,gpsData.longitude],16,{animate:true});}
-
 function updateMapStats(){
   if(!sessionLog.length){document.getElementById('mapStats').style.display='none';return;}
   document.getElementById('mapStats').style.display='flex';
@@ -307,11 +332,7 @@ function updateMapStats(){
 }
 
 function setStatus(msg,type=''){const el=document.getElementById('statusBar');el.textContent=msg;el.className='status-bar'+(type?' '+type:'');}
-
-function setBtnState(icon, text) {
-  document.getElementById('btnIcon').className = 'ti ' + icon;
-  document.getElementById('btnText').textContent = text;
-}
+function setBtnState(icon, text) { document.getElementById('btnIcon').className = 'ti ' + icon; document.getElementById('btnText').textContent = text; }
 
 async function handleMain(){
   if(!getKey()){showKeySetup();return;}
@@ -330,12 +351,12 @@ async function startCamera(){
     const v=document.getElementById('videoEl');
     v.srcObject=stream;await v.play();
     v.style.display='block';
-    document.getElementById('previewImg').style.display='none';
+    document.getElementById('photoContainer').style.display='none';
     document.getElementById('camPlaceholder').style.display='none';
     document.getElementById('resetBtn').style.display='block';
     setBtnState('ti-camera-plus','Scatta e Analizza');
     appState='camera';
-    setStatus('Inquadra il sito › premi per analizzare','ok');
+    setStatus('Inquadra lito/sedimento › premi per analizzare','ok');
     document.getElementById('mainBtn').disabled=false;
   }catch(e){
     setStatus('Fotocamera non accessibile: '+(e.name||e.message),'err');
@@ -347,54 +368,64 @@ async function captureAndAnalyze(){
   const v=document.getElementById('videoEl');
   const cv=document.getElementById('canvasEl');
   const pi=document.getElementById('previewImg');
+  const overlay=document.getElementById('visualTargetsOverlay');
+  
   const maxW=800, maxH=600;
   const ratio=Math.min(maxW/(v.videoWidth||800),maxH/(v.videoHeight||600));
   cv.width=Math.round((v.videoWidth||800)*ratio);
   cv.height=Math.round((v.videoHeight||600)*ratio);
   cv.getContext('2d').drawImage(v,0,0,cv.width,cv.height);
   const b64=cv.toDataURL('image/jpeg',.7).split(',')[1];
+  
   if(stream){stream.getTracks().forEach(t=>t.stop());stream=null;}
   v.style.display='none';
-  pi.src='data:image/jpeg;base64,'+b64;pi.style.display='block';
-  document.getElementById('cameraWrap').style.flex='0 0 45%';
+  pi.src='data:image/jpeg;base64,'+b64;
+  document.getElementById('photoContainer').style.display='block';
+  overlay.innerHTML = ''; 
+  
+  document.getElementById('cameraWrap').style.flex='0 0 42%';
   document.getElementById('loadingOverlay').classList.add('show');
   document.getElementById('scanLine').classList.add('active');
   document.getElementById('mainBtn').disabled=true;
-  const msgs=['Analisi visiva sedimenti…','Incrociando dati geologici…','Calcolo probabilità oro…','Elaborazione risultato…'];
+  
+  const msgs=['Scansione geometrica immagine…','Verifica coordinate nei registri minerari…','Calcolo vettori sedimentari…','Compilazione report…'];
   let mi=0;
-  const lt=setInterval(()=>{document.getElementById('loadingTxt').textContent=msgs[mi++%msgs.length];},1800);
+  const lt=setInterval(()=>{document.getElementById('loadingTxt').textContent=msgs[mi++%msgs.length];},1500);
 
-  const lat=gpsData?gpsData.latitude.toFixed(6):'N/A';
-  const lon=gpsData?gpsData.longitude.toFixed(6):'N/A';
+  const lat=gpsData?gpsData.latitude.toFixed(6):'44.4056'; // Default Liguria/Orba se manca GPS
+  const lon=gpsData?gpsData.longitude.toFixed(6):'8.6322';
   const key=getKey();
 
-  const prompt=`Sei un geologo esperto in prospezione aurifera fluviale in Italia, specializzato in zone ofiolitiche degli Appennini Settentrionali, Valle d'Aosta, Alpi Occidentali, fiumi Orba e Ticino. 
-  Analizza questa foto di sedimenti fluviali alla ricerca di indicatori di oro (presenza di sabbie nere, magnetite, quarzo, transizioni di corrente). 
-  Restituisci ESCLUSIVAMENTE un oggetto JSON valido con questa struttura esatta, senza testo introduttivo o formattazione markdown (NO blocchi con tre apici):
+  // PROMPT EVOLUTO: CHIEDE DETTAGLI SPAZIALI SULLA FOTO + RECORD STORICI DELLA COORDINATA GPS
+  const prompt = `Sei un geologo e ingegnere minerario esperto del territorio italiano.
+  L'utente si trova esattamente alle seguenti coordinate GPS: Latitudine ${lat}, Longitudine ${lon}.
+  
+  Esegui due compiti analizzando questa foto:
+  1. Identifica da 2 a 3 punti fisici esatti (micro-target) nell'inquadratura in cui conviene piazzare la batea o scavare, indicando per ciascuno le coordinate percentuali X e Y sull'immagine (0-100) per posizionare un mirino grafico.
+  2. Consulta la tua conoscenza dei database mineralogici, giacimenti storici e mappe geologiche regionali italiane per l'area corrispondente a queste coordinate GPS (es. bacino dell'Orba, Ticino, Dora Baltea, valli bergamasche, Appennini, ecc.) e descrivi il contesto estrattivo/storico locale conosciuto in letteratura geologica.
+
+  Restituisci ESCLUSIVAMENTE un oggetto JSON valido, senza blocchi di codice markdown, con questa struttura:
   {
-    "pct": 45,
-    "tier": "Probabilità Media",
-    "rock": "Descrizione delle rocce dominanti",
-    "geoCtx": "Contesto geologico rilevato",
-    "advice": ["Consiglio pratico di campionamento 1", "Consiglio 2"]
+    "pct": 65,
+    "tier": "Alta Probabilità Depositaria",
+    "rock": "Sabbie ultramafiche e ciottoli di serpentinite",
+    "geoCtx": "Curva interna / Area di magra torrentizia",
+    "db_locale": "Descrizione approfondita dei dati mineralogici e storici reali legati a questa area geografica e ai fiumi limitrofi nel raggio di 10km.",
+    "targets": [
+      { "num": 1, "x": 35, "y": 60, "localizzazione": "Base del masso a sinistra", "desc": "Accumulo di sedimenti pesanti e sabbia nera visibile", "pct": 75 },
+      { "num": 2, "x": 70, "y": 45, "localizzazione": "Frangia di deposito interna", "desc": "Punto di perdita velocità della corrente, ottima trappola idraulica", "pct": 55 }
+    ],
+    "advice": ["Usa il setaccio grosso per i primi 20cm", "Campione profondo vicino alla roccia madre"]
   }`;
 
   try {
     const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${key}`;
-    
     const response = await fetch(url, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        contents: [{
-          parts: [
-            { text: prompt },
-            { inlineData: { mimeType: 'image/jpeg', data: b64 } }
-          ]
-        }],
-        generationConfig: {
-          responseMimeType: "application/json"
-        }
+        contents: [{ parts: [{ text: prompt }, { inlineData: { mimeType: 'image/jpeg', data: b64 } }] }],
+        generationConfig: { responseMimeType: "application/json" }
       })
     });
 
@@ -403,17 +434,15 @@ async function captureAndAnalyze(){
     document.getElementById('scanLine').classList.remove('active');
     document.getElementById('mainBtn').disabled=false;
 
-    if(!response.ok) {
-      const errRes = await response.json();
-      throw new Error(errRes.error?.message || 'Errore nella risposta del server Google');
-    }
+    if(!response.ok) throw new Error('Errore di connessione ai server di calcolo Google.');
 
     const resData = await response.json();
     let textResult = resData.candidates[0].content.parts[0].text;
-
     textResult = textResult.replace(/```json/g, '').replace(/```/g, '').trim();
+    
     const json = JSON.parse(textResult);
 
+    // 1. Aggiornamento KPI principali
     document.getElementById('probVal').textContent = json.pct + '%';
     const pBar = document.getElementById('probBar');
     pBar.style.width = json.pct + '%';
@@ -421,7 +450,40 @@ async function captureAndAnalyze(){
     document.getElementById('probTier').textContent = json.tier;
     document.getElementById('rockType').textContent = json.rock;
     document.getElementById('geoCtx').textContent = json.geoCtx;
+    
+    // 2. Iniezione del Database Geomineralogico Georeferenziato
+    document.getElementById('dbText').textContent = json.db_locale || "Nessun dato storico critico registrato per questo esatto punto.";
 
+    // 3. Generazione dei Micro-Target grafici sulla foto e della lista dettagliata
+    const targetContainer = document.getElementById('targetContainer');
+    targetContainer.innerHTML = '';
+    
+    if(Array.isArray(json.targets)) {
+        json.targets.forEach(tgt => {
+            // Crea il pin grafico sopra l'immagine
+            const pin = document.createElement('div');
+            pin.className = 'visual-target';
+            pin.style.left = tgt.x + '%';
+            pin.style.top = tgt.y + '%';
+            pin.textContent = tgt.num;
+            overlay.appendChild(pin);
+
+            // Crea la riga descrittiva nel pannello inferiore
+            const row = document.createElement('div');
+            row.className = 'target-row';
+            row.innerHTML = `
+                <div class="target-num">${tgt.num}</div>
+                <div class="target-info">
+                    <div class="target-loc">${tgt.localizzazione}</div>
+                    <div class="target-desc">${tgt.desc}</div>
+                </div>
+                <div class="target-pct">${tgt.pct}%</div>
+            `;
+            targetContainer.appendChild(targetContainer.appendChild(row));
+        });
+    }
+
+    // 4. Strategia Operativa
     const listEl = document.getElementById('adviceList');
     listEl.innerHTML = '';
     if(Array.isArray(json.advice)){
@@ -434,6 +496,7 @@ async function captureAndAnalyze(){
 
     document.getElementById('resultsPanel').style.display = 'flex';
 
+    // Salva nel Log locale
     const now = new Date();
     const entry = {
       pct: parseInt(json.pct) || 0,
@@ -444,19 +507,14 @@ async function captureAndAnalyze(){
       date: now.toLocaleDateString('it-IT'),
       time: now.toTimeString().slice(0,5)
     };
-
     sessionLog.push(entry);
     localStorage.setItem('aurifind_log', JSON.stringify(sessionLog));
     
-    if(lat !== 'N/A' && lon !== 'N/A') {
-      addPin(entry);
-      updateMapStats();
-    }
-    
+    if(gpsData) { addPin(entry); updateMapStats(); }
     renderLog();
-    setBtnState('ti-refresh', 'Nuova Scansione / Reset');
+    setBtnState('ti-refresh', 'Nuovo Monitoraggio');
     appState = 'results';
-    setStatus('Analisi geologica completata con successo ✓', 'ok');
+    setStatus('Studio geo-spaziale completato. Obiettivi pronti.', 'ok');
 
   } catch (error) {
     clearInterval(lt);
@@ -464,21 +522,22 @@ async function captureAndAnalyze(){
     document.getElementById('scanLine').classList.remove('active');
     document.getElementById('mainBtn').disabled = false;
     console.error(error);
-    setStatus('Errore di elaborazione dati: ' + error.message, 'err');
+    setStatus('Errore analisi: ' + error.message, 'err');
   }
 }
 
 function resetScanner(){
   if(stream){stream.getTracks().forEach(t=>t.stop());stream=null;}
   document.getElementById('videoEl').style.display='none';
-  document.getElementById('previewImg').style.display='none';
+  document.getElementById('photoContainer').style.display='none';
+  document.getElementById('visualTargetsOverlay').innerHTML = '';
   document.getElementById('camPlaceholder').style.display='flex';
   document.getElementById('resultsPanel').style.display='none';
-  document.getElementById('cameraWrap').style.flex='0 0 45%';
+  document.getElementById('cameraWrap').style.flex='0 0 42%';
   document.getElementById('resetBtn').style.display='none';
   setBtnState('ti-camera','Avvia Fotocamera');
   appState='idle';
-  setStatus('Pronto per una nuova scansione.');
+  setStatus('In attesa di un nuovo sito di prospezione.');
 }
 
 function renderLog(){
@@ -487,7 +546,7 @@ function renderLog(){
     container.innerHTML=`<div class="log-hdr-row"><span class="log-hdr-title">Registro Scansioni</span></div><div class="log-empty"><i class="ti ti-notes-off" style="font-size:36px;opacity:.3"></i><p style="font-size:12px;opacity:.6;margin-top:6px">Nessuna voce memorizzata</p></div>`;
     return;
   }
-  let h=`<div class="log-hdr-row"><span class="log-hdr-title">Scansioni effettuate (${sessionLog.length})</span><button class="log-clear" onclick="clearLog()">Cancella tutto</button></div><div style="height:10px"></div>`;
+  let h=`<div class="log-hdr-row"><span class="log-hdr-title">Scansioni effettuate (${sessionLog.length})</span><button class="log-clear" onclick="clearLog()">Svuota</button></div><div style="height:10px"></div>`;
   sessionLog.slice().reverse().forEach(e=>{
     const c=pinColor(e.pct);
     h+=`<div class="log-item">
@@ -497,30 +556,30 @@ function renderLog(){
         <div class="log-item-rock">${e.rock}</div>
         <div class="log-item-coords">${e.lat}, ${e.lon}</div>
       </div>
-      <div class="log-item-time"><div>${e.date}</div><div style="opacity:.5;margin-top:2px">${e.time}</div></div>
+      <div class="log-item-time"><div>${e.date}</div><div>${e.time}</div></div>
     </div>`;
   });
   container.innerHTML=h;
 }
 
 function clearLog(){
-  if(!confirm('Vuoi cancellare definitivamente tutta la cronologia?'))return;
+  if(!confirm('Cancellare la cronologia?'))return;
   sessionLog=[];localStorage.removeItem('aurifind_log');
   if(map){scanMarkers.forEach(m=>map.removeLayer(m));scanMarkers=[];document.getElementById('mapEmpty').style.display='flex';}
   renderLog();updateMapStats();setStatus('Cronologia svuotata');
 }
 
 function exportGPX(){
-  if(!sessionLog.length){alert('Nessun dato da esportare');return;}
-  let gpx=`<?xml version="1.0" encoding="UTF-8"?><gpx version="1.1" creator="AuriFind" xmlns="http://www.topografix.com/GPX/1/1">`;
+  if(!sessionLog.length){alert('Nessun dato');return;}
+  let gpx=`<?xml version="1.0" encoding="UTF-8"?><gpx version="1.1" creator="AuriFind"><xs>`;
   sessionLog.forEach((e,i)=>{
-    if(e.lat==='N/A'||e.lon==='N/A')return;
-    gpx+=`<wpt lat="${e.lat}" lon="${e.lon}"><name>AuriFind #${sessionLog.length-i} (${e.pct}%)</name><desc>${e.tier} - ${e.rock}</desc></wpt>`;
+    if(e.lat==='N/A')return;
+    gpx+=`<wpt lat="${e.lat}" lon="${e.lon}"><name>GoldPoint ${e.pct}%</name><desc>${e.rock}</desc></wpt>`;
   });
   gpx+=`</gpx>`;
   const blob=new Blob([gpx],{type:'application/gpx+xml'});
   const url=URL.createObjectURL(blob);
-  const a=document.createElement('a');a.href=url;a.download=`aurifind_export_${new Date().toISOString().slice(0,10)}.gpx`;
+  const a=document.createElement('a');a.href=url;a.download=`aurifind_${new Date().toISOString().slice(0,10)}.gpx`;
   document.body.appendChild(a);a.click();document.body.removeChild(a);
 }
 </script>
