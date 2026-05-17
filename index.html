@@ -369,7 +369,7 @@ async function captureAndAnalyze(){
   const prompt=`Sei un geologo esperto in prospezione aurifera fluviale in Italia, specializzato in zone ofiolitiche degli Appennini Settentrionali, Valle d'Aosta, Alpi Occidentali, fiumi Orba, Bormida, Trebbia, Dora Baltea, Scrivia, Aveto. Coordinate GPS: lat ${lat}, lon ${lon}, acc ${acc}. Analizza la foto e stima la probabilità di trovare oro alluvionale. Considera: tipo roccia/sedimento visibile, minerali indicatori (quarzo, magnetite, granato, cromite, serpentinite, ofioliti), morfologia corso d'acqua, contesto geologico dalle coordinate. Rispondi SOLO con JSON valido senza markdown: {"probability":50,"rock_type":"descrizione","geo_context":"contesto","tier":"Bassa","recommendations":["r1","r2","r3"],"risk_factors":["f1","f2"]}. Tier: "Bassa"(0-30),"Media"(31-55),"Alta"(56-75),"Eccellente"(76-100).`;
 
   try{
-    const r=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${key}`,{
+    const r=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-002:generateContent?key=${key}`,{
       method:'POST',
       headers:{'Content-Type':'application/json'},
       body:JSON.stringify({
