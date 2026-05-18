@@ -270,7 +270,6 @@ function startGPS(){
   if(!navigator.geolocation){setStatus('GPS non disponibile','err');return;}
   navigator.geolocation.watchPosition(pos=>{
     gpsData=pos.coords;
-    // RISOLTO: Forziamo la visualizzazione immediata a 6 decimali per precisione < 1 metro al suolo
     document.getElementById('gpsCoords').textContent=pos.coords.latitude.toFixed(6)+', '+pos.coords.longitude.toFixed(6);
     document.getElementById('gpsAcc').textContent='±'+Math.round(pos.coords.accuracy)+'m';
     dot.className='gps-dot active';
@@ -293,7 +292,7 @@ function switchTab(tab){
 function initMap(){
   if(map)return;
   const c=gpsData?[gpsData.latitude,gpsData.longitude]:[44.5,8.8];
-  map=L.map('mapEl',{zoomControl:true,attributionControl:false}).setView(c,16); // Zoom iniziale aumentato per maggiore dettaglio sponde
+  map=L.map('mapEl',{zoomControl:true,attributionControl:false}).setView(c,16); 
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19}).addTo(map);
   sessionLog.forEach(e=>addPin(e));
   if(gpsData)updatePosMarker(gpsData.latitude,gpsData.longitude);
@@ -379,7 +378,6 @@ async function captureAndAnalyze(){
   if(stream){stream.getTracks().forEach(t=>t.stop());stream=null;}
   v.style.display='none';
   
-  // RISOLTO: Aggancio rigoroso a 6 decimali istantaneo per bloccare la sponda corretta
   const targetLat = gpsData ? gpsData.latitude.toFixed(6) : '44.405600';
   const targetLon = gpsData ? gpsData.longitude.toFixed(6) : '8.632200';
   
@@ -444,18 +442,41 @@ async function executeAnalysis(b64, lat, lon){
   document.getElementById('mainBtn').disabled=true;
   document.getElementById('uploadBtn').style.display='none';
   
+  document.getElementById('loadingTxt').textContent='Interrogazione server cartografici…';
+  const key=getKey();
+
+  // RISOLTO IL TORRENTE: Interroghiamo OpenStreetMap (Nominatim) in Reverse Geocoding prima di chiamare Gemini
+  let resolvedLocationText = "Coordinate geografiche pure.";
+  try {
+    const geoRes = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&addressdetails=1`, {
+        headers: { 'User-Agent': 'AuriFindGoldApp' }
+    });
+    if(geoRes.ok) {
+        const geoJson = await geoRes.json();
+        if(geoJson && geoJson.address) {
+            const addr = geoJson.address;
+            const waterway = addr.waterway || addr.river || addr.stream || '';
+            const suburb = addr.suburb || addr.village || addr.town || '';
+            const county = addr.county || addr.state || '';
+            resolvedLocationText = `Punto d'interesse idrografico rilevato dalle mappe ufficiali: Corso d'acqua/Elemento: ${waterway || 'Non nominato esplicitamente nelle mappe standard'}, Comune/Frazione: ${suburb}, Provincia/Regione: ${county}.`;
+        }
+    }
+  } catch(geoErr) {
+     console.warn("Errore geocoding inverso fallito, uso coordinate grezze:", geoErr);
+  }
+
   const msgs=['Analisi vettori sedimentari…','Interrogazione registri geologici…','Mappatura trappole idrauliche…','Compilazione report…'];
   let mi=0;
   const lt=setInterval(()=>{document.getElementById('loadingTxt').textContent=msgs[mi++%msgs.length];},1500);
-  const key=getKey();
 
-  // RISOLTO: Prompt irrigidito con vincoli geologici rigidi anti-ottimismo
+  // Forziamo Gemini a leggere il testo geografico ufficiale estratto da OSM
   const prompt = `Sei un severo Ingegnere Minerario e Geologo d'estrazione italiano. 
-  L'utente ha scattato/caricato una foto esattamente a queste coordinate GPS bloccate: Latitudine ${lat}, Longitudine ${lon}.
+  L'utente si trova a queste coordinate: Latitudine ${lat}, Longitudine ${lon}.
+  INFORMAZIONI CERTIFICATE DA MAPPE REALI: ${resolvedLocationText}
   
   Esegui un'analisi critica basandoti sui seguenti severi criteri di valutazione:
-  1. Le percentuali complessive ("pct") e dei singoli micro-target devono essere REALISTICHE e PESSIMISTICHE. Un valore superiore al 65% è giustificato SOLO se vedi roccia madre fessurata (bedrock) affiorante o strati spessi e neri di magnetite satura. Ghiaie normali, sabbie chiare o ciottoli sciolti valgono al massimo tra il 10% e il 40%. Non essere generoso.
-  2. Determina con precisione la fluidodinamica del corso d'acqua associato a questo punto GPS esatto, sfruttando i registri geologici storici italiani della zona (es. bacini orobici, piemontesi, veneti, toscani, ecc.).
+  1. Identifica il corso d'acqua indicato nelle informazioni certificate qui sopra. Se dice che è un corso d'acqua specifico o indica la frazione/comune, adatta rigorosamente il report mineralogico a quel bacino reale, attingendo alla tua conoscenza della letteratura geologica e mineraria italiana (es. registri storici). 
+  2. Le percentuali complessive ("pct") e dei singoli micro-target devono essere REALISTICHE e PESSIMISTICHE. Un valore superiore al 65% è giustificato SOLO se vedi roccia madre fessurata (bedrock) affiorante o strati spessi e neri di magnetite satura. Ghiaie normali o ciottoli sciolti valgono al massimo tra il 10% e il 40%. Non essere generoso.
 
   Restituisci ESCLUSIVAMENTE un oggetto JSON valido, senza blocchi di codice markdown esterni, con questa struttura:
   {
@@ -463,9 +484,9 @@ async function executeAnalysis(b64, lat, lon){
     "tier": "Bassa/Media Probabilità (Ghiaie di scorrimento)",
     "rock": "Ciottoli quarzosi e lito-frammenti misti",
     "geoCtx": "Sponda di scorrimento rettilinea",
-    "db_locale": "Identifica il torrente/fiume esatto di questa coordinata GPS. Fornisci un resoconto storico e mineralogico preciso della zona in letteratura (distanza da giacimenti primari o storici lavaggi).",
+    "db_locale": "Identifica chiaramente il torrente o il contesto idrico reale partendo dalle informazioni certificate fornite. Produci un resoconto geologico e mineralogico locale preciso e storico della zona nel raggio di 10km.",
     "targets": [
-      { "num": 1, "x": 45, "y": 70, "localizzazione": "Punto esatto nella foto", "desc": "Descrizione geologica del micro-target e del perché della percentuale assegnata.", "pct": 35 }
+      { "num": 1, "x": 45, "y": 70, "localizzazione": "Punto esatto nella foto", "desc": "Descrizione geologica del micro-target e spiegazione del perché della percentuale assegnata.", "pct": 35 }
     ],
     "advice": ["Fai un saggio profondo oltre lo strato di ciottoli superficiali", "Cerca la base dei massi stazionari"]
   }`;
@@ -483,7 +504,7 @@ async function executeAnalysis(b64, lat, lon){
 
     clearInterval(lt);
     document.getElementById('loadingOverlay').classList.remove('show');
-    document.getElementById('scanLine').classList.remove('active');
+    document.getElementById('scanLine').classList.add('active');
     document.getElementById('mainBtn').disabled=false;
 
     if(!response.ok) throw new Error('Impossibile connettersi ai server Gemini.');
@@ -561,7 +582,7 @@ async function executeAnalysis(b64, lat, lon){
     setBtnState('ti-refresh', 'Nuovo Monitoraggio');
     document.getElementById('resetBtn').style.display='block';
     appState = 'results';
-    setStatus('Studio geo-spaziale completato con criteri restrittivi.', 'ok');
+    setStatus('Studio completato incrociando mappe OpenStreetMap.', 'ok');
 
   } catch (error) {
     clearInterval(lt);
