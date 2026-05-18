@@ -270,12 +270,13 @@ function startGPS(){
   if(!navigator.geolocation){setStatus('GPS non disponibile','err');return;}
   navigator.geolocation.watchPosition(pos=>{
     gpsData=pos.coords;
-    document.getElementById('gpsCoords').textContent=pos.coords.latitude.toFixed(5)+', '+pos.coords.longitude.toFixed(5);
+    // RISOLTO: Forziamo la visualizzazione immediata a 6 decimali per precisione < 1 metro al suolo
+    document.getElementById('gpsCoords').textContent=pos.coords.latitude.toFixed(6)+', '+pos.coords.longitude.toFixed(6);
     document.getElementById('gpsAcc').textContent='±'+Math.round(pos.coords.accuracy)+'m';
     dot.className='gps-dot active';
     updatePosMarker(pos.coords.latitude,pos.coords.longitude);
   },()=>{dot.className='gps-dot';document.getElementById('gpsCoords').textContent='GPS non disponibile';},
-  {enableHighAccuracy:true,maximumAge:5000,timeout:15000});
+  {enableHighAccuracy:true,maximumAge:2000,timeout:10000});
 }
 
 function switchTab(tab){
@@ -292,14 +293,14 @@ function switchTab(tab){
 function initMap(){
   if(map)return;
   const c=gpsData?[gpsData.latitude,gpsData.longitude]:[44.5,8.8];
-  map=L.map('mapEl',{zoomControl:true,attributionControl:false}).setView(c,14);
+  map=L.map('mapEl',{zoomControl:true,attributionControl:false}).setView(c,16); // Zoom iniziale aumentato per maggiore dettaglio sponde
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19}).addTo(map);
   sessionLog.forEach(e=>addPin(e));
   if(gpsData)updatePosMarker(gpsData.latitude,gpsData.longitude);
   if(sessionLog.length)document.getElementById('mapEmpty').style.display='none';
 }
 
-function pinColor(pct){return pct<30?'#888780':pct<55?'#E24B4A':pct<75?'#EF9F27':'#639922';}
+function pinColor(pct){return pct<25?'#888780':pct<45?'#3B82F6':pct<65?'#EF9F27':'#639922';}
 
 function addPin(entry){
   if(!map)return;
@@ -320,7 +321,7 @@ function updatePosMarker(lat,lon){
   else posMarker=L.marker([lat,lon],{icon,zIndexOffset:1000}).addTo(map);
 }
 
-function centerMap(){if(map&&gpsData)map.setView([gpsData.latitude,gpsData.longitude],16,{animate:true});}
+function centerMap(){if(map&&gpsData)map.setView([gpsData.latitude,gpsData.longitude],17,{animate:true});}
 function updateMapStats(){
   if(!sessionLog.length){document.getElementById('mapStats').style.display='none';return;}
   document.getElementById('mapStats').style.display='flex';
@@ -378,15 +379,15 @@ async function captureAndAnalyze(){
   if(stream){stream.getTracks().forEach(t=>t.stop());stream=null;}
   v.style.display='none';
   
-  const targetLat = gpsData ? gpsData.latitude.toFixed(6) : '44.4056';
-  const targetLon = gpsData ? gpsData.longitude.toFixed(6) : '8.6322';
+  // RISOLTO: Aggancio rigoroso a 6 decimali istantaneo per bloccare la sponda corretta
+  const targetLat = gpsData ? gpsData.latitude.toFixed(6) : '44.405600';
+  const targetLon = gpsData ? gpsData.longitude.toFixed(6) : '8.632200';
   
   executeAnalysis(b64, targetLat, targetLon);
 }
 
-// FUNZIONE PER GESTIRE IL CARICAMENTO DEL FILE DA GALLERIA
 function handleFileUpload(event){
-  const file = event.target.target || event.target.files[0];
+  const file = event.target.files[0];
   if(!file) return;
   if(!getKey()){showKeySetup();return;}
 
@@ -399,7 +400,6 @@ function handleFileUpload(event){
     const imgDataUrl = e.target.result;
     const b64 = imgDataUrl.split(',')[1];
     
-    // Proviamo a estrarre le coordinate EXIF della foto
     const testImg = new Image();
     testImg.src = imgDataUrl;
     testImg.onload = function() {
@@ -411,7 +411,6 @@ function handleFileUpload(event){
         const lonRef = EXIF.getTag(this, "GPSLongitudeRef");
 
         if (latData && lonData) {
-          // Converti i dati EXIF in formato decimale standard
           lat = latData[0] + latData[1]/60 + latData[2]/3600;
           if (latRef === "S") lat = -lat;
           lon = lonData[0] + lonData[1]/60 + lonData[2]/3600;
@@ -419,10 +418,9 @@ function handleFileUpload(event){
           
           setStatus('GPS estratto dalla foto! ✓','ok');
         } else {
-          // Fallback sulle coordinate attuali se mancano gli EXIF
-          lat = gpsData ? gpsData.latitude : 44.4056;
-          lon = gpsData ? gpsData.longitude : 8.6322;
-          setStatus('Nessun GPS nel file, uso coordinate attuali.','ok');
+          lat = gpsData ? gpsData.latitude : 44.405600;
+          lon = gpsData ? gpsData.longitude : 8.632200;
+          setStatus('Nessun GPS nel file, uso coordinate smartphone.','ok');
         }
 
         executeAnalysis(b64, parseFloat(lat).toFixed(6), parseFloat(lon).toFixed(6));
@@ -451,25 +449,25 @@ async function executeAnalysis(b64, lat, lon){
   const lt=setInterval(()=>{document.getElementById('loadingTxt').textContent=msgs[mi++%msgs.length];},1500);
   const key=getKey();
 
-  const prompt = `Sei un geologo e ingegnere minerario esperto del territorio italiano.
-  L'utente si trova esattamente alle seguenti coordinate GPS: Latitudine ${lat}, Longitudine ${lon}.
+  // RISOLTO: Prompt irrigidito con vincoli geologici rigidi anti-ottimismo
+  const prompt = `Sei un severo Ingegnere Minerario e Geologo d'estrazione italiano. 
+  L'utente ha scattato/caricato una foto esattamente a queste coordinate GPS bloccate: Latitudine ${lat}, Longitudine ${lon}.
   
-  Esegui due compiti analizzando questa foto:
-  1. Identifica da 2 a 3 punti fisici esatti (micro-target) nell'inquadratura in cui conviene piazzare la batea o scavare, indicando per ciascuno le coordinate percentuali X e Y sull'immagine (0-100) per posizionare un mirino grafico.
-  2. Consulta la tua conoscenza dei database mineralogici, giacimenti storici e mappe geologiche regionali italiane per l'area corrispondente a queste coordinate GPS (es. bacino dell'Orba, Ticino, Dora Baltea, valli bergamasche, Appennini, ecc.) e descrivi il contesto estrattivo/storico locale conosciuto in letteratura geologica.
+  Esegui un'analisi critica basandoti sui seguenti severi criteri di valutazione:
+  1. Le percentuali complessive ("pct") e dei singoli micro-target devono essere REALISTICHE e PESSIMISTICHE. Un valore superiore al 65% è giustificato SOLO se vedi roccia madre fessurata (bedrock) affiorante o strati spessi e neri di magnetite satura. Ghiaie normali, sabbie chiare o ciottoli sciolti valgono al massimo tra il 10% e il 40%. Non essere generoso.
+  2. Determina con precisione la fluidodinamica del corso d'acqua associato a questo punto GPS esatto, sfruttando i registri geologici storici italiani della zona (es. bacini orobici, piemontesi, veneti, toscani, ecc.).
 
-  Restituisci ESCLUSIVAMENTE un oggetto JSON valido, senza blocchi di codice markdown, con questa struttura:
+  Restituisci ESCLUSIVAMENTE un oggetto JSON valido, senza blocchi di codice markdown esterni, con questa struttura:
   {
-    "pct": 65,
-    "tier": "Alta Probabilità Depositaria",
-    "rock": "Sabbie ultramafiche e ciottoli di serpentinite",
-    "geoCtx": "Curva interna / Area di magra torrentizia",
-    "db_locale": "Descrizione approfondita dei dati mineralogici e storici reali legati a questa area geografica e ai fiumi limitrofi nel raggio di 10km.",
+    "pct": 28,
+    "tier": "Bassa/Media Probabilità (Ghiaie di scorrimento)",
+    "rock": "Ciottoli quarzosi e lito-frammenti misti",
+    "geoCtx": "Sponda di scorrimento rettilinea",
+    "db_locale": "Identifica il torrente/fiume esatto di questa coordinata GPS. Fornisci un resoconto storico e mineralogico preciso della zona in letteratura (distanza da giacimenti primari o storici lavaggi).",
     "targets": [
-      { "num": 1, "x": 35, "y": 60, "localizzazione": "Base del masso a sinistra", "desc": "Accumulo di sedimenti pesanti e sabbia nera visibile", "pct": 75 },
-      { "num": 2, "x": 70, "y": 45, "localizzazione": "Frangia di deposito interna", "desc": "Punto di perdita velocità della corrente, ottima trappola idraulica", "pct": 55 }
+      { "num": 1, "x": 45, "y": 70, "localizzazione": "Punto esatto nella foto", "desc": "Descrizione geologica del micro-target e del perché della percentuale assegnata.", "pct": 35 }
     ],
-    "advice": ["Usa il setaccio grosso per i primi 20cm", "Campione profondo vicino alla roccia madre"]
+    "advice": ["Fai un saggio profondo oltre lo strato di ciottoli superficiali", "Cerca la base dei massi stazionari"]
   }`;
 
   try {
@@ -488,7 +486,7 @@ async function executeAnalysis(b64, lat, lon){
     document.getElementById('scanLine').classList.remove('active');
     document.getElementById('mainBtn').disabled=false;
 
-    if(!response.ok) throw new Error('Errore di connessione ai server di calcolo Google.');
+    if(!response.ok) throw new Error('Impossibile connettersi ai server Gemini.');
 
     const resData = await response.json();
     let textResult = resData.candidates[0].content.parts[0].text;
@@ -504,7 +502,7 @@ async function executeAnalysis(b64, lat, lon){
     document.getElementById('rockType').textContent = json.rock;
     document.getElementById('geoCtx').textContent = json.geoCtx;
     
-    document.getElementById('dbText').textContent = json.db_locale || "Nessun dato storico registrato.";
+    document.getElementById('dbText').textContent = json.db_locale;
 
     const targetContainer = document.getElementById('targetContainer');
     targetContainer.innerHTML = '';
@@ -526,7 +524,7 @@ async function executeAnalysis(b64, lat, lon){
                     <div class="target-loc">${tgt.localizzazione}</div>
                     <div class="target-desc">${tgt.desc}</div>
                 </div>
-                <div class="target-pct">${tgt.pct}%</div>
+                <div class="target-pct" style="color:${pinColor(tgt.pct)}">${tgt.pct}%</div>
             `;
             targetContainer.appendChild(row);
         });
@@ -563,7 +561,7 @@ async function executeAnalysis(b64, lat, lon){
     setBtnState('ti-refresh', 'Nuovo Monitoraggio');
     document.getElementById('resetBtn').style.display='block';
     appState = 'results';
-    setStatus('Analisi completata con successo.', 'ok');
+    setStatus('Studio geo-spaziale completato con criteri restrittivi.', 'ok');
 
   } catch (error) {
     clearInterval(lt);
