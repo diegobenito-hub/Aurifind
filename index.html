@@ -389,7 +389,7 @@ function handleFileUpload(event){
   if(!file) return;
   if(!getKey()){showKeySetup();return;}
 
-  setStatus('Estrazione metadati ed EXIF…');
+  setStatus('Lettura file immagine…');
   document.getElementById('resultsPanel').style.display='none';
   document.getElementById('camPlaceholder').style.display='none';
 
@@ -439,64 +439,46 @@ async function executeAnalysis(b64, lat, lon){
   document.getElementById('mainBtn').disabled=true;
   document.getElementById('uploadBtn').style.display='none';
   
-  document.getElementById('loadingTxt').textContent='Incrocio coordinate cartografiche…';
+  document.getElementById('loadingTxt').textContent='Localizzazione e analisi…';
   const key=getKey();
 
-  // GEOLOCALIZZAZIONE AVANZATA COMPATIBILE VAL GRAVEGLIA
-  let resolvedLocationText = "Bacino Idrografico della Val Graveglia (Torrente Graveglia), entroterra di Chiavari, Liguria.";
-  try {
-    const geoRes = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&addressdetails=1`, {
-        headers: { 'User-Agent': 'AuriFindGoldApp' }
-    });
-    if(geoRes.ok) {
-        const geoJson = await geoRes.json();
-        if(geoJson && geoJson.address) {
-            const addr = geoJson.address;
-            const waterway = addr.waterway || addr.river || addr.stream || '';
-            const suburb = addr.suburb || addr.village || addr.town || '';
-            const county = addr.county || addr.state || '';
-            resolvedLocationText = `Ubicazione certificata dalle mappe: Corso d'acqua principale: Torrente Graveglia, Comune/Località: ${suburb || 'Ne / Val Graveglia'}, Provincia: ${county}. NOTA OPERATIVA: Ignora la vicina Valle Sturla, sei nel cuore minerario della Val Graveglia.`;
-        }
-    }
-  } catch(geoErr) {
-     console.warn("Risoluzione cartografica fallita, forzo contesto Val Graveglia.");
-  }
-
-  const msgs=['Analisi depositi alluvionali…','Lettura archivi minerari ligure…','Mappatura trappole idrauliche…','Generazione report JSON…'];
-  let mi=0;
-  const lt=setInterval(()=>{document.getElementById('loadingTxt').textContent=msgs[mi++%msgs.length];},1500);
-
-  // Prompt ultra-selezionato per evitare troncamenti e forzare la storia mineraria della Val Graveglia
-  const prompt = `Sei un Ingegnere Minerario e Geologo ligure esperto.
-  L'utente sta campionando nel Torrente Graveglia (Val Graveglia). Coordinate: ${lat}, ${lon}.
-  CONTESTO CARTOGRAFICO: ${resolvedLocationText}
-
-  Esegui un'analisi rigorosa basandoti su:
-  1. CONTESTO MINERARIO REALE: Integra nel campo "db_locale" la vera storia mineraria della Val Graveglia (es. la vicina Miniera di Gambatesa, i diaspri, i complessi ofiolitici, le rocce a manganese e silice, i calcari a calpionelle). Spiega come questo specifico reticolo idrografico trasporti mineralizzazioni pesanti e se ci sono evidenze storiche di oro nativo o pirite/calcopirite aurifera nei torrenti della val Graveglia. Sii sintetico ed evita di nominare la Valle Sturla.
-  2. VALUTAZIONE PESSIMISTICA: Assegna una percentuale totale ("pct") realistica e prudente per l'oro (es. tra 15% e 45% per letti di ciottoli superficiali e depositi di scorrimento classici).
-
-  Restituisci ESCLUSIVAMENTE un oggetto JSON compatto, senza interruzioni e senza blocchi markdown, strutturato così:
+  const prompt = `Sei un Ingegnere Minerario esperto della geologia della Liguria.
+  L'utente sta esaminando i sedimenti del Torrente Graveglia, Val Graveglia, Italia (Coordinate: ${lat}, ${lon}).
+  
+  Esegui un'analisi dei ciottoli e delle trappole idrauliche visibili.
+  CONTESTO IMPERATIVO: Concentrati esclusivamente sul complesso geologico minerario della Val Graveglia (diaspri, complessi ofiolitici ligure, calcari a calpionelle, giacimenti di manganese stile Gambatesa/Reppia). Non menzionare MAI la Valle Sturla. Mantieni una stima prudente (pct tra 15% e 45%).
+  
+  Restituisci la tua risposta rigorosamente e unicamente in questo formato JSON, senza alcun testo aggiuntivo prima o dopo:
   {
-    "pct": 25,
-    "tier": "Bassa/Media Probabilità (Sedimenti di scorrimento)",
-    "rock": "Diaspri, ofioliti e ciottoli calcarei",
-    "geoCtx": "Letto alluvionale attivo / sponda interna",
-    "db_locale": "Breve sintesi storica e geologica focalizzata sulla Val Graveglia, i suoi diaspri e le mineralizzazioni idrotermali associate al complesso ofiolitico ligure.",
+    "pct": 28,
+    "tier": "Probabilità Moderata (Accumuli Alluvionali)",
+    "rock": "Diaspri rossi, Ofioliti e Calcari a Calpionelle",
+    "geoCtx": "Letto attivo e alternanze detritiche torrentizie della Val Graveglia",
+    "db_locale": "Il Torrente Graveglia drena una delle zone più ricche di mineralizzazioni idrotermali della Liguria. La presenza storica di miniere di manganese (Gambatesa) e vene silicee rende questo bacino cruciale per i minerali pesanti associati.",
     "targets": [
-      { "num": 1, "x": 50, "y": 65, "localizzazione": "Base del masso a destra", "desc": "Accumulo potenziale di minerali pesanti dietro l'ostacolo idraulico.", "pct": 30 }
+      { "num": 1, "x": 45, "y": 60, "localizzazione": "Intra-clasti nei ciottoli medio-grandi", "desc": "Punto di rallentamento della corrente favorevole alla sedimentazione pesante.", "pct": 32 }
     ],
-    "advice": ["Saggia le fessure profonde tra i blocchi di diaspro", "Concentra i lavaggi sulle sabbie nere basali"]
+    "advice": [
+      "Concentra i lavaggi sulle frazioni sabbiose e limose scure intrappolate sotto i grandi massi di diaspro.",
+      "Cerca zone di magnetite o pirite associata nelle sponde interne del torrente."
+    ]
   }`;
 
+  const lt=setInterval(()=>{document.getElementById('loadingTxt').textContent='Elaborazione dati mineralogici…';},2000);
+
   try {
-    // Utilizzo corretto dell'endpoint universale v1beta senza sotto-modelli deprecati
-    const url = `https://generativelanguage.googleapis.com/v1/models/gemini-2.5-flash:generateContent?key=${key}`;
+    // FIX COMPLETO PUNTO 1: Chiamata pulita e strutturata nativamente per Gemini 2.5 senza endpoint obsoleti
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${key}`;
     const response = await fetch(url, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        contents: [{ parts: [{ text: prompt }, { inlineData: { mimeType: 'image/jpeg', data: b64 } }] }],
-        generationConfig: { responseMimeType: "application/json" }
+        contents: [{
+          parts: [
+            { text: prompt },
+            { inlineData: { mimeType: 'image/jpeg', data: b64 } }
+          ]
+        }]
       })
     });
 
@@ -505,14 +487,20 @@ async function executeAnalysis(b64, lat, lon){
     document.getElementById('scanLine').classList.remove('active');
     document.getElementById('mainBtn').disabled=false;
 
-    if(!response.ok) throw new Error('Risposta API non valida o chiave non configurata.');
+    if(!response.ok) {
+       const errData = await response.json().catch(()=>({}));
+       throw new Error(errData?.error?.message || 'Risposta del server non valida.');
+    }
 
     const resData = await response.json();
     let textResult = resData.candidates[0].content.parts[0].text;
+    
+    // FIX COMPLETO PUNTO 2: Rimozione di qualsiasi formattazione markdown per blindare il parsing ed evitare "Unterminated string"
     textResult = textResult.replace(/```json/g, '').replace(/```/g, '').trim();
     
     const json = JSON.parse(textResult);
 
+    // Rendering dei dati a schermo
     document.getElementById('probVal').textContent = json.pct + '%';
     const pBar = document.getElementById('probBar');
     pBar.style.width = json.pct + '%';
@@ -560,6 +548,7 @@ async function executeAnalysis(b64, lat, lon){
 
     document.getElementById('resultsPanel').style.display = 'flex';
 
+    // Salvataggio nel log locale
     const now = new Date();
     const entry = {
       pct: parseInt(json.pct) || 0,
@@ -576,10 +565,10 @@ async function executeAnalysis(b64, lat, lon){
     addPin(entry); 
     updateMapStats();
     renderLog();
-    setBtnState('ti-refresh', 'Nuovo Monitoraggio');
+    setBtnState('ti-refresh', 'Nuova Scansione');
     document.getElementById('resetBtn').style.display='block';
     appState = 'results';
-    setStatus('Studio completato. Bacino del Torrente Graveglia agganciato ✓', 'ok');
+    setStatus('Analisi completata con successo sul Torrente Graveglia!', 'ok');
 
   } catch (error) {
     clearInterval(lt);
@@ -639,12 +628,12 @@ function clearLog(){
 
 function exportGPX(){
   if(!sessionLog.length){alert('Nessun dato');return;}
-  let gpx=`<?xml version="1.0" encoding="UTF-8"?><gpx version="1.1" creator="AuriFind"><xs>`;
+  let gpx=`<?xml version="1.0" encoding="UTF-8"?><gpx version="1.1" creator="AuriFind"><wpt>`;
   sessionLog.forEach((e,i)=>{
     if(e.lat==='N/A')return;
     gpx+=`<wpt lat="${e.lat}" lon="${e.lon}"><name>GoldPoint ${e.pct}%</name><desc>${e.rock}</desc></wpt>`;
   });
-  gpx+=`</gpx>`;
+  gpx+=`</wpt></gpx>`;
   const blob=new Blob([gpx],{type:'application/gpx+xml'});
   const url=URL.createObjectURL(blob);
   const a=document.createElement('a');a.href=url;a.download=`aurifind_${new Date().toISOString().slice(0,10)}.gpx`;
