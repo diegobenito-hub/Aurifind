@@ -442,8 +442,8 @@ async function executeAnalysis(b64, lat, lon){
   document.getElementById('loadingTxt').textContent='Incrocio coordinate reali satellitari…';
   const key=getKey();
 
-  // RISOLUZIONE DINAMICA DELLE COORDINATE REALI (EVITA DI ESSERE CIECO)
-  let geoInfoDinamica = `Coordinate geografiche isolate: Lat ${lat}, Lon ${lon}.`;
+  // RECUPERO REALE DELLA POSIZIONE CARTOGRAFICA (ZERO CONDIZIONAMENTI COCODIFICATI)
+  let geoInfoDinamica = `Località non identificata. Coordinate pure: Lat ${lat}, Lon ${lon}.`;
   try {
     const geoRes = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&addressdetails=1`, {
         headers: { 'User-Agent': 'AuriFindGoldApp' }
@@ -456,39 +456,36 @@ async function executeAnalysis(b64, lat, lon){
             const village = addr.village || addr.town || addr.suburb || addr.city || '';
             const county = addr.county || addr.state || '';
             
-            geoInfoDinamica = `Localizzazione reale verificata: Corso d'acqua/Idrografia: ${waterway || 'Non rilevato direttamente'}, Località/Comune: ${village}, Area/Provincia: ${county}.`;
-            
-            // Regola salva-allucinazione specifica per la Val Graveglia
-            if(geoInfoDinamica.toLowerCase().includes("graveglia") || geoInfoDinamica.toLowerCase().includes("ne")) {
-                geoInfoDinamica += " NOTA RIGIDA: Ti trovi esattamente nella Val Graveglia mineraria (GE). Ignora totalmente la vicina Valle Sturla.";
-            }
+            geoInfoDinamica = `Punto Geografico Rilevato -> Corso d'acqua: ${waterway || 'Nessuno'}, Comune/Località: ${village}, Area/Provincia: ${county}.`;
         }
     }
   } catch(geoErr) {
      console.warn("Mappe OSM non raggiungibili, uso dati grezzi.");
   }
 
-  const prompt = `Sei un Ingegnere Minerario e Geologo esperto.
-  L'utente ha fotografato un campione o un letto fluviale alle seguenti coordinate reali: ${lat}, ${lon}.
-  Dati cartografici reali del punto: ${geoInfoDinamica}.
+  // PROMPT COMPLETAMENTE NEUTRO: L'IA ESEGUE L'ANALISI SOLO IN BASE AI DATI REALI PASSATI
+  const prompt = `Sei un esperto Ingegnere Minerario e Geologo da campo.
+  L'utente ha fotografato clasti, rocce o sedimenti fluviali esattamente a queste coordinate geografiche:
+  Latitudine: ${lat}
+  Longitudine: ${lon}
+  Informazioni del geocoding reale: ${geoInfoDinamica}
   
-  Esegui un'analisi mineralogica accurata della foto in base al luogo esatto in cui si trova. 
-  Se ti trovi nel Torrente Graveglia, attieniti esclusivamente alla sua geologia (diaspri, miniere di manganese storiche, complessi ofiolitici) senza farti confondere da valli vicine come la Valle Sturla. Se ti trovi altrove nel mondo, adatta l'analisi al vero contesto geologico del posto rilevato dalle coordinate.
-  Mantieni una stima totale prudente dell'oro ("pct" solitamente compreso tra il 10% e il 45%).
+  Sulla base dell'immagine caricata e della collocazione geografica reale sopra indicata (fondamentale per capire il contesto regionale corretto), fornisci un'analisi lito-mineralogica e geomorfologica oggettiva del sito specifico in cui si trova l'utente. Se i dati cartografici indicano una determinata vallata, attieniti esclusivamente ad essa evitando allucinazioni su valli adiacenti.
+  Mantieni una stima totale prudente della probabilità d'oro ("pct" solitamente tra il 10% e il 45%).
   
-  Restituisci la tua risposta RIGOROSAMENTE in questo formato JSON compatto, senza marcatori markdown (no \`\`\`json) e senza alcun testo prima o dopo l'oggetto:
+  Restituisci la tua risposta RIGOROSAMENTE in questo formato JSON compatto, senza marcatori markdown (vietato l'uso di \`\`\`json) e senza alcun testo prima o dopo l'oggetto:
   {
-    "pct": 25,
-    "tier": "Inserisci il livello di probabilità",
-    "rock": "Descrizione sintetica delle matrici rocciose dominanti visibili",
-    "geoCtx": "Contesto geomorfologico esatto (es. sponda interna, alveo secco, ecc.)",
-    "db_locale": "Massimo due frasi sulla vera storia mineraria o geologica specifica di questo luogo esatto tratto dalle coordinate.",
+    "pct": 20,
+    "tier": "Livello di probabilità",
+    "rock": "Matrici rocciose dominanti osservate coerenti con la geologia locale",
+    "geoCtx": "Contesto geomorfologico preciso desunto da immagine e coordinate",
+    "db_locale": "Breve nota (massimo due frasi) sulla storia geologica o mineraria reale della località indicata dai dati cartografici.",
     "targets": [
-      { "num": 1, "x": 50, "y": 60, "localizzazione": "Punto esatto", "desc": "Perché campionare qui", "pct": 30 }
+      { "num": 1, "x": 50, "y": 50, "localizzazione": "Punto esatto", "desc": "Motivazione del campionamento", "pct": 25 }
     ],
     "advice": [
-      "Primo consiglio operativo pratico",
-      "Secondo consiglio operativo pratico"
+      "Consiglio pratico di lavaggio o campionamento 1",
+      "Consiglio pratico di lavaggio o campionamento 2"
     ]
   }`;
 
@@ -522,7 +519,7 @@ async function executeAnalysis(b64, lat, lon){
     const resData = await response.json();
     let textResult = resData.candidates[0].content.parts[0].text;
     
-    // Pulizia totale da stringhe markdown per evitare crash di parsing
+    // Pulizia da stringhe markdown
     textResult = textResult.replace(/```json/g, '').replace(/```/g, '').trim();
     
     const json = JSON.parse(textResult);
@@ -593,7 +590,7 @@ async function executeAnalysis(b64, lat, lon){
     setBtnState('ti-refresh', 'Nuova Scansione');
     document.getElementById('resetBtn').style.display='block';
     appState = 'results';
-    setStatus('Scansione completata nell\'allineamento corretto! ✓', 'ok');
+    setStatus('Scansione completata in modo oggettivo dinamico! ✓', 'ok');
 
   } catch (error) {
     clearInterval(lt);
