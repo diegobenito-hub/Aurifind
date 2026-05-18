@@ -389,7 +389,7 @@ function handleFileUpload(event){
   if(!file) return;
   if(!getKey()){showKeySetup();return;}
 
-  setStatus('Lettura file immagine…');
+  setStatus('Lettura file immagine e coordinate…');
   document.getElementById('resultsPanel').style.display='none';
   document.getElementById('camPlaceholder').style.display='none';
 
@@ -439,35 +439,62 @@ async function executeAnalysis(b64, lat, lon){
   document.getElementById('mainBtn').disabled=true;
   document.getElementById('uploadBtn').style.display='none';
   
-  document.getElementById('loadingTxt').textContent='Localizzazione e analisi…';
+  document.getElementById('loadingTxt').textContent='Incrocio coordinate reali satellitari…';
   const key=getKey();
 
-  const prompt = `Sei un Ingegnere Minerario esperto della geologia della Liguria.
-  L'utente sta esaminando i sedimenti del Torrente Graveglia, Val Graveglia, Italia (Coordinate: ${lat}, ${lon}).
+  // RISOLUZIONE DINAMICA DELLE COORDINATE REALI (EVITA DI ESSERE CIECO)
+  let geoInfoDinamica = `Coordinate geografiche isolate: Lat ${lat}, Lon ${lon}.`;
+  try {
+    const geoRes = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&addressdetails=1`, {
+        headers: { 'User-Agent': 'AuriFindGoldApp' }
+    });
+    if(geoRes.ok) {
+        const geoJson = await geoRes.json();
+        if(geoJson && geoJson.address) {
+            const addr = geoJson.address;
+            const waterway = addr.waterway || addr.river || addr.stream || '';
+            const village = addr.village || addr.town || addr.suburb || addr.city || '';
+            const county = addr.county || addr.state || '';
+            
+            geoInfoDinamica = `Localizzazione reale verificata: Corso d'acqua/Idrografia: ${waterway || 'Non rilevato direttamente'}, Località/Comune: ${village}, Area/Provincia: ${county}.`;
+            
+            // Regola salva-allucinazione specifica per la Val Graveglia
+            if(geoInfoDinamica.toLowerCase().includes("graveglia") || geoInfoDinamica.toLowerCase().includes("ne")) {
+                geoInfoDinamica += " NOTA RIGIDA: Ti trovi esattamente nella Val Graveglia mineraria (GE). Ignora totalmente la vicina Valle Sturla.";
+            }
+        }
+    }
+  } catch(geoErr) {
+     console.warn("Mappe OSM non raggiungibili, uso dati grezzi.");
+  }
+
+  const prompt = `Sei un Ingegnere Minerario e Geologo esperto.
+  L'utente ha fotografato un campione o un letto fluviale alle seguenti coordinate reali: ${lat}, ${lon}.
+  Dati cartografici reali del punto: ${geoInfoDinamica}.
   
-  Esegui un'analisi dei ciottoli e delle trappole idrauliche visibili.
-  CONTESTO IMPERATIVO: Concentrati esclusivamente sul complesso geologico minerario della Val Graveglia (diaspri, complessi ofiolitici ligure, calcari a calpionelle, giacimenti di manganese stile Gambatesa/Reppia). Non menzionare MAI la Valle Sturla. Mantieni una stima prudente (pct tra 15% e 45%).
+  Esegui un'analisi mineralogica accurata della foto in base al luogo esatto in cui si trova. 
+  Se ti trovi nel Torrente Graveglia, attieniti esclusivamente alla sua geologia (diaspri, miniere di manganese storiche, complessi ofiolitici) senza farti confondere da valli vicine come la Valle Sturla. Se ti trovi altrove nel mondo, adatta l'analisi al vero contesto geologico del posto rilevato dalle coordinate.
+  Mantieni una stima totale prudente dell'oro ("pct" solitamente compreso tra il 10% e il 45%).
   
-  Restituisci la tua risposta rigorosamente e unicamente in questo formato JSON, senza alcun testo aggiuntivo prima o dopo:
+  Restituisci la tua risposta RIGOROSAMENTE in questo formato JSON compatto, senza marcatori markdown (no \`\`\`json) e senza alcun testo prima o dopo l'oggetto:
   {
-    "pct": 28,
-    "tier": "Probabilità Moderata (Accumuli Alluvionali)",
-    "rock": "Diaspri rossi, Ofioliti e Calcari a Calpionelle",
-    "geoCtx": "Letto attivo e alternanze detritiche torrentizie della Val Graveglia",
-    "db_locale": "Il Torrente Graveglia drena una delle zone più ricche di mineralizzazioni idrotermali della Liguria. La presenza storica di miniere di manganese (Gambatesa) e vene silicee rende questo bacino cruciale per i minerali pesanti associati.",
+    "pct": 25,
+    "tier": "Inserisci il livello di probabilità",
+    "rock": "Descrizione sintetica delle matrici rocciose dominanti visibili",
+    "geoCtx": "Contesto geomorfologico esatto (es. sponda interna, alveo secco, ecc.)",
+    "db_locale": "Massimo due frasi sulla vera storia mineraria o geologica specifica di questo luogo esatto tratto dalle coordinate.",
     "targets": [
-      { "num": 1, "x": 45, "y": 60, "localizzazione": "Intra-clasti nei ciottoli medio-grandi", "desc": "Punto di rallentamento della corrente favorevole alla sedimentazione pesante.", "pct": 32 }
+      { "num": 1, "x": 50, "y": 60, "localizzazione": "Punto esatto", "desc": "Perché campionare qui", "pct": 30 }
     ],
     "advice": [
-      "Concentra i lavaggi sulle frazioni sabbiose e limose scure intrappolate sotto i grandi massi di diaspro.",
-      "Cerca zone di magnetite o pirite associata nelle sponde interne del torrente."
+      "Primo consiglio operativo pratico",
+      "Secondo consiglio operativo pratico"
     ]
   }`;
 
-  const lt=setInterval(()=>{document.getElementById('loadingTxt').textContent='Elaborazione dati mineralogici…';},2000);
+  const lt=setInterval(()=>{document.getElementById('loadingTxt').textContent='Interrogazione intelligenza artificiale…';},2000);
 
   try {
-    // FIX COMPLETO PUNTO 1: Chiamata pulita e strutturata nativamente per Gemini 2.5 senza endpoint obsoleti
     const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${key}`;
     const response = await fetch(url, {
       method: 'POST',
@@ -489,18 +516,17 @@ async function executeAnalysis(b64, lat, lon){
 
     if(!response.ok) {
        const errData = await response.json().catch(()=>({}));
-       throw new Error(errData?.error?.message || 'Risposta del server non valida.');
+       throw new Error(errData?.error?.message || 'Risposta API fallita.');
     }
 
     const resData = await response.json();
     let textResult = resData.candidates[0].content.parts[0].text;
     
-    // FIX COMPLETO PUNTO 2: Rimozione di qualsiasi formattazione markdown per blindare il parsing ed evitare "Unterminated string"
+    // Pulizia totale da stringhe markdown per evitare crash di parsing
     textResult = textResult.replace(/```json/g, '').replace(/```/g, '').trim();
     
     const json = JSON.parse(textResult);
 
-    // Rendering dei dati a schermo
     document.getElementById('probVal').textContent = json.pct + '%';
     const pBar = document.getElementById('probBar');
     pBar.style.width = json.pct + '%';
@@ -548,7 +574,6 @@ async function executeAnalysis(b64, lat, lon){
 
     document.getElementById('resultsPanel').style.display = 'flex';
 
-    // Salvataggio nel log locale
     const now = new Date();
     const entry = {
       pct: parseInt(json.pct) || 0,
@@ -568,7 +593,7 @@ async function executeAnalysis(b64, lat, lon){
     setBtnState('ti-refresh', 'Nuova Scansione');
     document.getElementById('resetBtn').style.display='block';
     appState = 'results';
-    setStatus('Analisi completata con successo sul Torrente Graveglia!', 'ok');
+    setStatus('Scansione completata nell\'allineamento corretto! ✓', 'ok');
 
   } catch (error) {
     clearInterval(lt);
@@ -577,7 +602,7 @@ async function executeAnalysis(b64, lat, lon){
     document.getElementById('mainBtn').disabled = false;
     document.getElementById('uploadBtn').style.display='block';
     console.error(error);
-    setStatus('Errore: ' + error.message, 'err');
+    setStatus('Errore di elaborazione: ' + error.message, 'err');
   }
 }
 
