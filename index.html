@@ -442,7 +442,6 @@ async function executeAnalysis(b64, lat, lon){
   document.getElementById('loadingTxt').textContent='Incrocio coordinate reali satellitari…';
   const key=getKey();
 
-  // RECUPERO REALE DELLA POSIZIONE CARTOGRAFICA (ZERO CONDIZIONAMENTI COCODIFICATI)
   let geoInfoDinamica = `Località non identificata. Coordinate pure: Lat ${lat}, Lon ${lon}.`;
   try {
     const geoRes = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&addressdetails=1`, {
@@ -456,36 +455,40 @@ async function executeAnalysis(b64, lat, lon){
             const village = addr.village || addr.town || addr.suburb || addr.city || '';
             const county = addr.county || addr.state || '';
             
-            geoInfoDinamica = `Punto Geografico Rilevato -> Corso d'acqua: ${waterway || 'Nessuno'}, Comune/Località: ${village}, Area/Provincia: ${county}.`;
+            geoInfoDinamica = `Corso d'acqua: ${waterway || 'Nessuno'}, Località: ${village}, Area: ${county}.`;
         }
     }
   } catch(geoErr) {
      console.warn("Mappe OSM non raggiungibili, uso dati grezzi.");
   }
 
-  // PROMPT COMPLETAMENTE NEUTRO: L'IA ESEGUE L'ANALISI SOLO IN BASE AI DATI REALI PASSATI
-  const prompt = `Sei un esperto Ingegnere Minerario e Geologo da campo.
-  L'utente ha fotografato clasti, rocce o sedimenti fluviali esattamente a queste coordinate geografiche:
+  // NUOVA LOGICA DEL PROMPT SUL PESO STORICO E SULLE TRAPPOLE GEOMORFOLOGICHE
+  const prompt = `Sei un Ingegnere Minerario ed esperto Geologo da campo specializzato in prospezione alluvionale.
+  L'utente ha fotografato clasti, rocce o porzioni di alveo fluviale a queste coordinate geografiche reali:
   Latitudine: ${lat}
   Longitudine: ${lon}
-  Informazioni del geocoding reale: ${geoInfoDinamica}
-  
-  Sulla base dell'immagine caricata e della collocazione geografica reale sopra indicata (fondamentale per capire il contesto regionale corretto), fornisci un'analisi lito-mineralogica e geomorfologica oggettiva del sito specifico in cui si trova l'utente. Se i dati cartografici indicano una determinata vallata, attieniti esclusivamente ad essa evitando allucinazioni su valli adiacenti.
-  Mantieni una stima totale prudente della probabilità d'oro ("pct" solitamente tra il 10% e il 45%).
+  Dati cartografici estratti in tempo reale: ${geoInfoDinamica}
+
+  Valuta attentamente il contesto geologico e storico regionale basandoti sulla località. Se l'area appartiene a contesti auriferi conclamati storicamente (es. fiumi piemontesi come Elvo, Orco, Sesia, Ticino; o specifici distretti storici liguri, toscani o alpini), la percentuale ("pct") complessiva e i micro-target devono riflettere questa ricchezza, scalando decisamente verso l'alto (fino al 55-80% nei punti esatti di accumulo). Se l'area ha scarsa o nulla storia mineraria alluvionale, mantieni stime prudente o basse (10-25%).
+
+  Inoltre, analizza visivamente la fluidodinamica e la granulometria nell'immagine per isolare i punti esatti di deposizione ad alta densità (le "trappole d'oro"). Assegna percentuali nettamente differenziate all'interno dello stesso frame:
+  - Percentuali ELEVATE (fino al 70-85% in contesti storici) su bersagli dietro a grandi massi (punti di ombra idraulica), fessure verticali nel bedrock, concentrazioni evidenti di sabbie nere magnetitiche o clasti ad alta densità ben incastrati.
+  - Percentuali BASSE su sabbie fini libere esposte a corrente viva o ciottoli leggeri superficiali.
   
   Restituisci la tua risposta RIGOROSAMENTE in questo formato JSON compatto, senza marcatori markdown (vietato l'uso di \`\`\`json) e senza alcun testo prima o dopo l'oggetto:
   {
-    "pct": 20,
-    "tier": "Livello di probabilità",
-    "rock": "Matrici rocciose dominanti osservate coerenti con la geologia locale",
-    "geoCtx": "Contesto geomorfologico preciso desunto da immagine e coordinate",
-    "db_locale": "Breve nota (massimo due frasi) sulla storia geologica o mineraria reale della località indicata dai dati cartografici.",
+    "pct": 45,
+    "tier": "Livello di probabilità (es. Eccellente - Contesto Storico + Trappola Idraulica)",
+    "rock": "Matrici rocciose e indicatori pesanti identificati",
+    "geoCtx": "Analisi fluidodinamica della porzione d'alveo inquadrata",
+    "db_locale": "Nota storica e geologica reale sul potenziale estrattivo di questo specifico bacino/regione.",
     "targets": [
-      { "num": 1, "x": 50, "y": 50, "localizzazione": "Punto esatto", "desc": "Motivazione del campionamento", "pct": 25 }
+      { "num": 1, "x": 42, "y": 65, "localizzazione": "Dietro il masso principale (Ombra della corrente)", "desc": "Punto classico di rilascio di materiali pesanti ad alta densità.", "pct": 65 },
+      { "num": 2, "x": 70, "y": 30, "localizzazione": "Sabbia fine superficiale", "desc": "Deposito leggero post-piena, probabilità di accumulo profondo ridotta.", "pct": 15 }
     ],
     "advice": [
-      "Consiglio pratico di lavaggio o campionamento 1",
-      "Consiglio pratico di lavaggio o campionamento 2"
+      "Esegui un saggio profondo rimuovendo lo strato superficiale fino a raggiungere il livello dei ciottoli grossolani.",
+      "Concentra il lavaggio sul sedimento estratto dalla base dei blocchi più pesanti."
     ]
   }`;
 
@@ -518,8 +521,6 @@ async function executeAnalysis(b64, lat, lon){
 
     const resData = await response.json();
     let textResult = resData.candidates[0].content.parts[0].text;
-    
-    // Pulizia da stringhe markdown
     textResult = textResult.replace(/```json/g, '').replace(/```/g, '').trim();
     
     const json = JSON.parse(textResult);
@@ -590,7 +591,7 @@ async function executeAnalysis(b64, lat, lon){
     setBtnState('ti-refresh', 'Nuova Scansione');
     document.getElementById('resetBtn').style.display='block';
     appState = 'results';
-    setStatus('Scansione completata in modo oggettivo dinamico! ✓', 'ok');
+    setStatus('Analisi completata con criteri fluidodinamici e storici! ✓', 'ok');
 
   } catch (error) {
     clearInterval(lt);
