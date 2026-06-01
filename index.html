@@ -72,7 +72,7 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
 .target-num{width:24px;height:24px;background:var(--surface2);border:1px solid var(--gold);color:var(--gold);border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Share Tech Mono',monospace;font-weight:700;font-size:12px;flex-shrink:0}
 .target-info{flex:1;min-width:0}
 .target-loc{font-size:12px;font-weight:600;color:var(--text)}
-.target-desc{font-size:11px;color:var(--muted);margin-top:2px;line-height:1.3}
+.target-desc{font-size:11px;color:var(--muted);margin-top:2px;line-height:1.4}
 .target-pct{font-family:'Share Tech Mono',monospace;font-size:18px;font-weight:700;color:var(--gold);flex-shrink:0}
 .db-card{background:linear-gradient(135deg, var(--surface) 0%, #1e2530 100%);border:1px solid #2e384d;border-radius:11px;padding:12px}
 .db-text{font-size:12px;color:#cbd5e1;line-height:1.45}
@@ -355,7 +355,7 @@ async function startCamera(){
     document.getElementById('resetBtn').style.display='block';
     setBtnState('ti-camera-plus','Scatta e Analizza');
     appState='camera';
-    setStatus('Inquadra lito/sedimento › premi per analizzare','ok');
+    setStatus('Inquadra lito/sedimento voltandoti di spalle rispetto alla provenienza della corrente. › premi per analizzare','ok');
     document.getElementById('mainBtn').disabled=false;
   }catch(e){
     setStatus('Fotocamera non accessibile: '+(e.name||e.message),'err');
@@ -439,7 +439,7 @@ async function executeAnalysis(b64, lat, lon){
   document.getElementById('mainBtn').disabled=true;
   document.getElementById('uploadBtn').style.display='none';
   
-  document.getElementById('loadingTxt').textContent='Incrocio coordinate reali satellitari…';
+  document.getElementById('loadingTxt').textContent='Incrocio mappe OSM ed estrazione idronimi reali…';
   const key=getKey();
 
   let geoInfoDinamica = `Località non identificata. Coordinate pure: Lat ${lat}, Lon ${lon}.`;
@@ -455,33 +455,31 @@ async function executeAnalysis(b64, lat, lon){
             const village = addr.village || addr.town || addr.suburb || addr.city || '';
             const county = addr.county || addr.state || '';
             
-            geoInfoDinamica = `Corso d'acqua: ${waterway || 'Nessuno'}, Località: ${village}, Area: ${county}.`;
+            geoInfoDinamica = `Corso d'acqua identificato dalle mappe: ${waterway || 'Non censito esplicitamente ma presente nel reticolo geometrico'}, Località antropica: ${village}, Provincia/Regione: ${county}.`;
         }
     }
   } catch(geoErr) {
      console.warn("Mappe OSM non raggiungibili, uso dati grezzi.");
   }
 
-  // NUOVA LOGICA DEL PROMPT SUL PESO STORICO E SULLE TRAPPOLE GEOMORFOLOGICHE
   const prompt = `Sei un Ingegnere Minerario ed esperto Geologo da campo specializzato in prospezione alluvionale.
   L'utente ha fotografato clasti, rocce o porzioni di alveo fluviale a queste coordinate geografiche reali:
   Latitudine: ${lat}
   Longitudine: ${lon}
-  Dati cartografici estratti in tempo reale: ${geoInfoDinamica}
+  Dati idrografici e cartografici estratti in tempo reale dalle mappe: ${geoInfoDinamica}
 
-  Valuta attentamente il contesto geologico e storico regionale basandoti sulla località. Se l'area appartiene a contesti auriferi conclamati storicamente (es. fiumi piemontesi come Elvo, Orco, Sesia, Ticino; o specifici distretti storici liguri, toscani o alpini), la percentuale ("pct") complessiva e i micro-target devono riflettere questa ricchezza, scalando decisamente verso l'alto (fino al 55-80% nei punti esatti di accumulo). Se l'area ha scarsa o nulla storia mineraria alluvionale, mantieni stime prudente o basse (10-25%).
-
-  Inoltre, analizza visivamente la fluidodinamica e la granulometria nell'immagine per isolare i punti esatti di deposizione ad alta densità (le "trappole d'oro"). Assegna percentuali nettamente differenziate all'interno dello stesso frame:
-  - Percentuali ELEVATE (fino al 70-85% in contesti storici) su bersagli dietro a grandi massi (punti di ombra idraulica), fessure verticali nel bedrock, concentrazioni evidenti di sabbie nere magnetitiche o clasti ad alta densità ben incastrati.
-  - Percentuali BASSE su sabbie fini libere esposte a corrente viva o ciottoli leggeri superficiali.
+  REQUISITI FONDAMENTALI DI VALUTAZIONE:
+  1. PESO STORICO COERENTE (MAPPA): Valuta attentamente la stringa dei dati cartografici e le coordinate. Se l'area appartiene a contesti auriferi conclamati storicamente (es. fiumi piemontesi come Elvo, Orco, Sesia, Ticino, Malone; o specifici distretti storici liguri (es. Gorzente), toscani o alpini), la percentuale ("pct") complessiva e i micro-target devono riflettere questa ricchezza, scalando decisamente verso l'alto (fino al 55-80% nei punti esatti di accumulo). Se l'area ha scarsa o nulla storia mineraria alluvionale, mantieni stime prudente o basse (10-25%).
+  2. FLUIDODINAMICA DI SCATTO (FOTO): L'inquadratura mostra il corso d'acqua catturato con la corrente che si allontana dall'osservatore (spalle alla corrente). Cerca attivamente i punti d'ombra idraulica dietro i massi sommersi, l'interno delle curve (punti di rilascio dei sedimenti pesanti), le fessure verticali esposte nel bedrock (bedrock cracks) o gli strati inferiori di strisce di ghiaia a granulometria eterogenea (sabbie nere magnetitiche). 
+  Assegna percentuali nettamente differenziate all'interno dello stesso frame: elevatissime nei punti di accumulo profondi e minime sulla sabbia fine mossa superficiale.
   
   Restituisci la tua risposta RIGOROSAMENTE in questo formato JSON compatto, senza marcatori markdown (vietato l'uso di \`\`\`json) e senza alcun testo prima o dopo l'oggetto:
   {
     "pct": 45,
-    "tier": "Livello di probabilità (es. Eccellente - Contesto Storico + Trappola Idraulica)",
+    "tier": "Livello di probabilità (es. Eccellente - Contesto Storico [Fiume Rilevato] + Trappola Idraulica)",
     "rock": "Matrici rocciose e indicatori pesanti identificati",
     "geoCtx": "Analisi fluidodinamica della porzione d'alveo inquadrata",
-    "db_locale": "Nota storica e geologica reale sul potenziale estrattivo di questo specifico bacino/regione.",
+    "db_locale": "Identificazione geologica reale basata sulla mappa: riporta se il corso d'acqua o la provincia estratti fanno parte di distretti minerari/alluvionali storici noti e spiega perché le percentuali sono state elevate o ridotte.",
     "targets": [
       { "num": 1, "x": 42, "y": 65, "localizzazione": "Dietro il masso principale (Ombra della corrente)", "desc": "Punto classico di rilascio di materiali pesanti ad alta densità.", "pct": 65 },
       { "num": 2, "x": 70, "y": 30, "localizzazione": "Sabbia fine superficiale", "desc": "Deposito leggero post-piena, probabilità di accumulo profondo ridotta.", "pct": 15 }
@@ -591,7 +589,7 @@ async function executeAnalysis(b64, lat, lon){
     setBtnState('ti-refresh', 'Nuova Scansione');
     document.getElementById('resetBtn').style.display='block';
     appState = 'results';
-    setStatus('Analisi completata con criteri fluidodinamici e storici! ✓', 'ok');
+    setStatus('Analisi completata incrociando dati cartografici e fluidodinamici! ✓', 'ok');
 
   } catch (error) {
     clearInterval(lt);
