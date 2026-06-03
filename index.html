@@ -83,7 +83,6 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
 .btn-inline-save{width:100%;background:var(--surface2);color:var(--gold);border:1px solid var(--gold);border-radius:10px;padding:12px;font-family:'Barlow',sans-serif;font-size:13.5px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;margin-top:4px;transition:background .2s;}
 .btn-inline-save:active{background:var(--border)}
 
-/* Selettore Direzione Corrente */
 .flow-selector-wrap{padding:10px 14px 4px 14px;background:var(--surface);border-top:1px solid var(--border);display:flex;flex-direction:column;gap:6px;flex-shrink:0}
 .flow-title{font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);display:flex;align-items:center;gap:4px}
 .flow-options{display:flex;background:var(--bg);border:1px solid var(--border);border-radius:9px;padding:2px}
@@ -188,7 +187,7 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
   </div>
   <div class="gps-bar" style="position:relative">
     <div class="gps-dot searching" id="gpsDot"></div>
-    <div class="gps-coords" id="gpsCoords">Localizzazione in corso…</div>
+    <div class="gps-coords" id="gpsCoords">Localizzazione in corso...</div>
     <div class="gps-acc" id="gpsAcc"></div>
     <span class="key-badge" onclick="showKeySetup()">⚙ API key</span>
   </div>
@@ -210,7 +209,7 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
         <div class="scan-line" id="scanLine"></div>
         <div class="loading-overlay" id="loadingOverlay">
           <div class="spinner"></div>
-          <div class="loading-txt" id="loadingTxt">Analisi geologica…</div>
+          <div class="loading-txt" id="loadingTxt">Analisi geologica...</div>
         </div>
       </div>
       
@@ -253,8 +252,9 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
     </div>
     <div class="log-view" id="logView"><div id="logContent"></div></div>
   </div>
-  <div class="status-bar" id="statusBar"></div>
+  <div class="status-bar" id="statusBar">In attesa di attivazione.</div>
   
+  <!-- SELETTORE PROSPETTIVA CORRENTE -->
   <div class="flow-selector-wrap" id="flowSelectorWrap">
     <div class="flow-title"><i class="ti ti-ripple"></i> Direzione scorrimento acqua nella foto:</div>
     <div class="flow-options">
@@ -316,7 +316,7 @@ function saveKey(){
   if(!k||!k.startsWith('AIza')){alert('Key non valida — deve iniziare con AIza');return;}
   localStorage.setItem('gemini_key',k);
   document.getElementById('keySetup').style.display='none';
-  setStatus('API key salvata ✓','ok');
+  setStatus('API key salvata ok','ok');
 }
 function getKey(){return localStorage.getItem('gemini_key')||'';}
 
@@ -324,7 +324,7 @@ function setFlowDirection(dir) {
   currentFlowDirection = dir;
   document.getElementById('flow-front').className = 'flow-btn' + (dir === 'frontale' ? ' active' : '');
   document.getElementById('flow-away').className = 'flow-btn' + (dir === 'allontanamento' ? ' active' : '');
-  setStatus('Vettore idraulico impostato: ' + (dir === 'frontale' ? 'Corrente Frontale' : 'In Allontanamento'), 'ok');
+  setStatus('Direzione acqua: ' + (dir === 'frontale' ? 'Corrente Frontale' : 'In Allontanamento'), 'ok');
 }
 
 function startGPS(){
@@ -336,7 +336,7 @@ function startGPS(){
     document.getElementById('gpsAcc').textContent='±'+Math.round(pos.coords.accuracy)+'m';
     dot.className='gps-dot active';
     updatePosMarker(pos.coords.latitude,pos.coords.longitude);
-  },()=>{dot.className='gps-dot';document.getElementById('gpsCoords').textContent='GPS non disponibile';},
+  },()=>{dot.className='gps-dot';document.getElementById('gpsCoords').textContent='GPS in ricerca o spento';},
   {enableHighAccuracy:true,maximumAge:2000,timeout:10000});
 }
 
@@ -407,7 +407,7 @@ async function startCamera(){
   document.getElementById('uploadBtn').style.display='none';
   document.getElementById('resultsPanel').style.display='none';
   document.getElementById('cameraWrap').style.flex='1';
-  setStatus('Richiesta fotocamera…');
+  setStatus('Richiesta fotocamera...');
   try{
     stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'environment'},width:{ideal:1280},height:{ideal:720}},audio:false});
     const v=document.getElementById('videoEl');
@@ -418,12 +418,13 @@ async function startCamera(){
     document.getElementById('resetBtn').style.display='block';
     setBtnState('ti-camera-plus','Scatta e Analizza');
     appState='camera';
-    setStatus('Inquadra lito o sedimento impostando il senso dell acqua. Clicca per analizzare','ok');
+    setStatus('Inquadra il letto del torrente e premi Scatta','ok');
     document.getElementById('mainBtn').disabled=false;
   }catch(e){
-    setStatus('Fotocamera non accessibile (Usa Carica se sei su HTTP): '+(e.name||e.message),'err');
+    setStatus('Fotocamera bloccata. Uso caricamento file obbligatorio.','err');
     document.getElementById('mainBtn').disabled=false;
     document.getElementById('uploadBtn').style.display='block';
+    document.getElementById('fileInputEl').click();
   }
 }
 
@@ -452,7 +453,7 @@ function handleFileUpload(event){
   if(!file) return;
   if(!getKey()){showKeySetup();return;}
 
-  setStatus('Lettura file immagine e coordinate…');
+  setStatus('Lettura file immagine...');
   document.getElementById('resultsPanel').style.display='none';
   document.getElementById('camPlaceholder').style.display='none';
 
@@ -511,12 +512,12 @@ async function executeAnalysis(b64, lat, lon){
   document.getElementById('uploadBtn').style.display='none';
   document.getElementById('flowSelectorWrap').style.display='none';
   
-  document.getElementById('loadingTxt').textContent='Incrocio mappe OSM ed estrazione idronimi reali…';
+  document.getElementById('loadingTxt').textContent='Estrazione dati geografici OSM...';
   const key=getKey();
 
-  let geoInfoDinamica = `Località non identificata. Coordinate pure: Lat ${lat}, Lon ${lon}.`;
+  let geoInfoDinamica = "Localita non identificata cartograficamente. Coordinate: Lat " + lat + ", Lon " + lon;
   try {
-    const geoRes = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&addressdetails=1`, {
+    const geoRes = await fetch('https://nominatim.openstreetmap.org/reverse?format=json&lat=' + lat + '&lon=' + lon + '&addressdetails=1', {
         headers: { 'User-Agent': 'AuriFindGoldApp' }
     });
     if(geoRes.ok) {
@@ -527,52 +528,23 @@ async function executeAnalysis(b64, lat, lon){
             const village = addr.village || addr.town || addr.suburb || addr.city || '';
             const county = addr.county || addr.state || '';
             
-            geoInfoDinamica = `Corso d acqua identificato dalle mappe: ${waterway || 'Non censito esplicitamente'}, Località: ${village}, Provincia: ${county}.`;
+            geoInfoDinamica = "Corso d acqua identificato: " + (waterway || 'Non censito') + ", Localita: " + village + ", Area: " + county;
         }
     }
   } catch(geoErr) {
-     console.warn("Mappe OSM non raggiungibili, uso dati grezzi.");
+     console.warn("Mappe non raggiungibili, uso dati grezzi GPS.");
   }
 
   const indicazioneCorrentePrompt = currentFlowDirection === 'frontale' 
-    ? "La corrente dell acqua scorre in senso FRONTALE, ovvero proviene dal fondo dell inquadratura (parte alta della foto) e si muove VERSO il fotografo (parte bassa della foto)." 
-    : "La corrente dell acqua scorre in senso di ALLONTANAMENTO, ovvero si muove partendo dal fotografo (parte bassa della foto) e prosegue VERSO il fondo della prospettiva (parte alta della foto).";
+    ? "La corrente scorre in senso FRONTALE (proviene dal fondo dell inquadratura e si muove VERSO il fotografo)." 
+    : "La corrente scorre in senso di ALLONTANAMENTO (si muove partendo dal basso foto e va VERSO il fondo dell inquadratura).";
 
-  const prompt = `Sei un Ingegnere Minerario ed esperto Geologo da campo specializzato in prospezione alluvionale e analisi lito-morfologica.
-  L'utente ha scattato una foto alle seguenti coordinate geografiche reali:
-  Latitudine: ${lat} | Longitudine: ${lon}
-  Dati idrografici cartografici: ${geoInfoDinamica}
+  const prompt = "Sei un esperto Geologo minerario. L utente ha scattato una foto alle seguenti coordinate geografiche: Latitudine: " + lat + " | Longitudine: " + lon + ". Informazioni geografiche rilevate: " + geoInfoDinamica + ". VETTORE IDRAULICO IMPORTANTE: " + indicazioneCorrentePrompt + " Escludi la vegetazione verde dalle sponde. Calcola le ombre idrauliche di deposito dei massi coerentemente alla direzione della corrente indicata. Restituisci la risposta esclusivamente in formato JSON compatto senza alcun blocco di codice markdown (NON USARE i tre apici ```json) o altro testo prima e dopo l oggetto. Struttura: { 'pct': 45, 'tier': 'Probabilita Moderata', 'rock': 'Descrizione ciottoli', 'geoCtx': 'Contesto geomorfologico basato sulla corrente', 'db_locale': 'Dettagli storici geologia', 'targets': [{ 'num': 1, 'x': 50, 'y': 60, 'localizzazione': 'Dietro al masso principale', 'desc': 'Sacchetta di accumulo ottimale', 'pct': 60 }], 'advice': ['Campione di prova sul fondo', 'Evita le sponde sabbiose esterne'] }";
 
-  VETTORE DINAMICO CORRENTE DICHIARATO DALL'UTENTE (FONDAMENTALE):
-  ${indicazioneCorrentePrompt}
-
-  DIRETTIVE GEOMETRICHE E FLUIDODINAMICHE CRITICHE:
-  1. FILTRO VEGETAZIONE ASSOLUTO: Isola ed escludi categoricamente le aree verdi laterali (arbusti, cespugli, fogliame delle sponde). Il torrente scorre al centro o dove si vede l'alveo ciottoloso/sabbioso chiaro. Non piazzare mai target sulle piante.
-  2. CALCOLO DELLE OMBRE IDRAULICHE SUI MASSI: Usa l'orientamento della corrente dichiarato sopra per trovare le esatte sacche di deposito deposizionale per gravità (oro nativo, magnetite):
-     - Se la corrente è FRONTALE (viene verso il basso), l'area di deposito protetta si trova IMMEDIATAMENTE SOTTO il masso in direzione del fondo foto (ovvero la parte a valle del masso nell'inquadratura).
-     - Se la corrente è IN ALLONTANAMENTO (va verso l'alto), l'area di deposito protetta si trova IMMEDIATAMENTE SOPRA il masso in direzione del fondo foto (ovvero la parte a valle dell'ostacolo nella linea di fuga).
-  3. EMBRICAZIONE E CLASTI: Identifica i punti di rallentamento della corrente all'interno del letto fluviale nudo e pulito (curve, cambi di pendenza).
-
-  Restituisci la tua risposta RIGOROSAMENTE in questo formato JSON compatto, senza marcatori markdown (vietato l'uso di \`\`\`json) e senza alcun testo prima o dopo l'oggetto:
-  {
-    "pct": 32,
-    "tier": "Livello di probabilità (es. Moderato)",
-    "rock": "Matrici clastiche identificate",
-    "geoCtx": "Analisi morfologica accurata basata sulla direzione della corrente.",
-    "db_locale": "Analisi basata sul Torrente/Area: commenta la geologia locale reale e giustifica il voto.",
-    "targets": [
-      { "num": 1, "x": 52, "y": 60, "localizzazione": "Ombra idraulica calcolata rispetto al vettore", "desc": "Sito ad alta densità detritica individuato correttamente.", "pct": 45 }
-    ],
-    "advice": [
-      "Scava sul lato di riparo dall'energia del flusso seguendo l'orientamento indicato.",
-      "Ignora le piante e concentrati sulla matrice ghiaiosa centrale."
-    ]
-  }`;
-
-  const lt=setInterval(()=>{document.getElementById('loadingTxt').textContent='Elaborazione ombre idrauliche basate sul vettore…';},2000);
+  const lt=setInterval(()=>{document.getElementById('loadingTxt').textContent='Elaborazione ombre idrauliche detritiche...';},2050);
 
   try {
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${key}`;
+    const url = '[https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=](https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=)' + key;
     const response = await fetch(url, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -580,7 +552,7 @@ async function executeAnalysis(b64, lat, lon){
         contents: [{
           parts: [
             { text: prompt },
-            { inlineData: { `mimeType`: 'image/jpeg', data: b64 } }
+            { inlineData: { mimeType: 'image/jpeg', data: b64 } }
           ]
         }]
       })
@@ -593,12 +565,13 @@ async function executeAnalysis(b64, lat, lon){
 
     if(!response.ok) {
        const errData = await response.json().catch(()=>({}));
-       throw new Error(errData?.error?.message || 'Risposta API fallita.');
+       throw new Error(errData?.error?.message || 'Risposta server fallita.');
     }
 
     const resData = await response.json();
     let textResult = resData.candidates[0].content.parts[0].text;
-    textResult = textResult.replace(/```json/g, '').replace(/```/g, '').trim();
+    textResult = textResult.replace(/
+```json/g, '').replace(/```/g, '').trim();
     
     const json = JSON.parse(textResult);
 
@@ -621,7 +594,7 @@ async function executeAnalysis(b64, lat, lon){
             pin.className = 'visual-target';
             pin.style.left = tgt.x + '%';
             pin.style.top = tgt.y + '%';
-            pin.innerHTML = `<span class="tgt-lbl-num">${tgt.num}</span><span class="tgt-lbl-pct">${tgt.pct}%</span>`;
+            pin.innerHTML = '<span class="tgt-lbl-num">' + tgt.num + '</span><span class="tgt-lbl-pct">' + tgt.pct + '%</span>';
             overlay.appendChild(pin);
 
             const row = document.createElement('div');
@@ -669,7 +642,7 @@ async function executeAnalysis(b64, lat, lon){
     setBtnState('ti-refresh', 'Nuova Scansione');
     document.getElementById('resetBtn').style.display='block';
     appState = 'results';
-    setStatus('Analisi completata integrando il vettore idraulico! ✓', 'ok');
+    setStatus('Analisi completata con successo! ok', 'ok');
 
   } catch (error) {
     clearInterval(lt);
@@ -679,7 +652,7 @@ async function executeAnalysis(b64, lat, lon){
     document.getElementById('uploadBtn').style.display='block';
     document.getElementById('flowSelectorWrap').style.display='flex';
     console.error(error);
-    setStatus('Errore analisi: ' + error.message, 'err');
+    setStatus('Errore: ' + error.message, 'err');
   }
 }
 
@@ -689,7 +662,7 @@ function downloadAnnotatedPhoto() {
   const img = document.getElementById('previewImg');
   
   if (!img.src || currentTargetsGlobal.length === 0) {
-    alert("Nessuna foto analizzata disponibile.");
+    alert("Nessuna foto disponibile.");
     return;
   }
   
@@ -717,13 +690,13 @@ function downloadAnnotatedPhoto() {
     
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    ctx.font = `bold ${Math.max(14, radius * 0.75)}px 'Share Tech Mono', monospace`;
+    ctx.font = "bold " + Math.max(14, radius * 0.75) + "px 'Share Tech Mono', monospace";
     ctx.fillStyle = '#EF9F27';
     ctx.fillText(tgt.num, pixelX, pixelY - (radius * 0.22));
     
-    ctx.font = `bold ${Math.max(10, radius * 0.52)}px 'Share Tech Mono', monospace`;
+    ctx.font = "bold " + Math.max(10, radius * 0.52) + "px 'Share Tech Mono', monospace";
     ctx.fillStyle = '#ffffff';
-    ctx.fillText(`${tgt.pct}%`, pixelX, pixelY + (radius * 0.38));
+    ctx.fillText(tgt.pct + '%', pixelX, pixelY + (radius * 0.38));
   });
   
   ctx.fillStyle = 'rgba(0, 0, 0, 0.75)';
@@ -732,16 +705,16 @@ function downloadAnnotatedPhoto() {
   ctx.font = "13px 'Share Tech Mono', monospace";
   ctx.textAlign = 'left';
   const gpsTxt = document.getElementById('gpsCoords').textContent;
-  ctx.fillText(`AuriFind AI — Vettore: ${currentFlowDirection.toUpperCase()} — GPS: ${gpsTxt}`, 16, cv.height - 15);
+  ctx.fillText("AuriFind AI - Corrente: " + currentFlowDirection.toUpperCase() + " - GPS: " + gpsTxt, 16, cv.height - 15);
   
   const dataUrl = cv.toDataURL('image/jpeg', 0.9);
   const link = document.createElement('a');
-  link.download = `aurifind_scan_${new Date().toISOString().slice(0,10)}.jpg`;
+  link.download = 'aurifind_scan_' + new Date().toISOString().slice(0,10) + '.jpg';
   link.href = dataUrl;
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
-  setStatus('Immagine salvata! ✓', 'ok');
+  setStatus('Immagine esportata! ok', 'ok');
 }
 
 function resetScanner(){
@@ -758,13 +731,13 @@ function resetScanner(){
   document.getElementById('fileInputEl').value = '';
   setBtnState('ti-camera','Avvia Fotocamera');
   appState='idle';
-  setStatus('In attesa di un nuovo sito di prospezione.');
+  setStatus('In attesa di scansione.');
 }
 
 function renderLog(){
   const container=document.getElementById('logContent');
   if(!sessionLog.length){
-    container.innerHTML=`<div class="log-hdr-row"><span class="log-hdr-title">Registro Scansioni</span></div><div class="log-empty"><i class="ti ti-notes-off" style="font-size:36px;opacity:.3"></i><p style="font-size:12px;opacity:.6;margin-top:6px">Nessuna voce memorizzata</p></div>`;
+    container.innerHTML=`<div class="log-hdr-row"><span class="log-hdr-title">Registro Scansioni</span></div><div class="log-empty"><i class="ti ti-notes-off" style="font-size:36px;opacity:.3"></i><p style="font-size:12px;opacity:.6;margin-top:6px">Nessuna voce in archivio</p></div>`;
     return;
   }
   let h=`<div class="log-hdr-row"><span class="log-hdr-title">Scansioni effettuate (${sessionLog.length})</span><button class="log-clear" onclick="clearLog()">Svuota</button></div><div style="height:10px"></div>`;
@@ -787,7 +760,7 @@ function clearLog(){
   if(!confirm('Cancellare la cronologia?'))return;
   sessionLog=[];localStorage.removeItem('aurifind_log');
   if(map){scanMarkers.forEach(m=>map.removeLayer(m));scanMarkers=[];document.getElementById('mapEmpty').style.display='flex';}
-  renderLog();updateMapStats();setStatus('Cronologia vuota');
+  renderLog();updateMapStats();setStatus('Cronologia svuotata');
 }
 
 function exportGPX(){
