@@ -302,7 +302,7 @@ let stream=null,appState='idle',gpsData=null;
 let sessionLog=JSON.parse(localStorage.getItem('aurifind_log')||'[]');
 let map=null,posMarker=null,scanMarkers=[];
 let currentTargetsGlobal = [];
-let currentFlowDirection = 'frontale'; // Variabile di stato per la corrente
+let currentFlowDirection = 'frontale';
 
 window.addEventListener('load',()=>{
   startClock(); startGPS(); renderLog(); updateMapStats();
@@ -418,10 +418,10 @@ async function startCamera(){
     document.getElementById('resetBtn').style.display='block';
     setBtnState('ti-camera-plus','Scatta e Analizza');
     appState='camera';
-    setStatus('Inquadra lito/sedimento impostando il senso dell'acqua. › premi per analizzare','ok');
+    setStatus('Inquadra lito o sedimento impostando il senso dell acqua. Clicca per analizzare','ok');
     document.getElementById('mainBtn').disabled=false;
   }catch(e){
-    setStatus('Fotocamera non accessibile: '+(e.name||e.message),'err');
+    setStatus('Fotocamera non accessibile (Usa Carica se sei su HTTP): '+(e.name||e.message),'err');
     document.getElementById('mainBtn').disabled=false;
     document.getElementById('uploadBtn').style.display='block';
   }
@@ -509,7 +509,7 @@ async function executeAnalysis(b64, lat, lon){
   document.getElementById('scanLine').classList.add('active');
   document.getElementById('mainBtn').disabled=true;
   document.getElementById('uploadBtn').style.display='none';
-  document.getElementById('flowSelectorWrap').style.display='none'; // Nascondi durante analisi
+  document.getElementById('flowSelectorWrap').style.display='none';
   
   document.getElementById('loadingTxt').textContent='Incrocio mappe OSM ed estrazione idronimi reali…';
   const key=getKey();
@@ -527,17 +527,16 @@ async function executeAnalysis(b64, lat, lon){
             const village = addr.village || addr.town || addr.suburb || addr.city || '';
             const county = addr.county || addr.state || '';
             
-            geoInfoDinamica = `Corso d'acqua identificato dalle mappe: ${waterway || 'Non censito esplicitamente'}, Località: ${village}, Provincia/Regione: ${county}.`;
+            geoInfoDinamica = `Corso d acqua identificato dalle mappe: ${waterway || 'Non censito esplicitamente'}, Località: ${village}, Provincia: ${county}.`;
         }
     }
   } catch(geoErr) {
      console.warn("Mappe OSM non raggiungibili, uso dati grezzi.");
   }
 
-  // Costruiamo il testo descrittivo del vettore idraulico da dare a Gemini
   const indicazioneCorrentePrompt = currentFlowDirection === 'frontale' 
-    ? "La corrente dell'acqua scorre in senso FRONTALE, ovvero proviene dal fondo dell'inquadratura (parte alta della foto) e si muove VERSO il fotografo (parte bassa della foto)." 
-    : "La corrente dell'acqua scorre in senso di ALLONTANAMENTO, ovvero si muove partendo dal fotografo (parte bassa della foto) e prosegue VERSO il fondo della prospettiva (parte alta della foto).";
+    ? "La corrente dell acqua scorre in senso FRONTALE, ovvero proviene dal fondo dell inquadratura (parte alta della foto) e si muove VERSO il fotografo (parte bassa della foto)." 
+    : "La corrente dell acqua scorre in senso di ALLONTANAMENTO, ovvero si muove partendo dal fotografo (parte bassa della foto) e prosegue VERSO il fondo della prospettiva (parte alta della foto).";
 
   const prompt = `Sei un Ingegnere Minerario ed esperto Geologo da campo specializzato in prospezione alluvionale e analisi lito-morfologica.
   L'utente ha scattato una foto alle seguenti coordinate geografiche reali:
@@ -557,12 +556,12 @@ async function executeAnalysis(b64, lat, lon){
   Restituisci la tua risposta RIGOROSAMENTE in questo formato JSON compatto, senza marcatori markdown (vietato l'uso di \`\`\`json) e senza alcun testo prima o dopo l'oggetto:
   {
     "pct": 32,
-    "tier": "Livello di probabilità (es. Moderato - Deposito da ombra idraulica selettiva)",
-    "rock": "Matrici clastiche identificate (es. Ciottoli serpentinitici ed arenacei)",
+    "tier": "Livello di probabilità (es. Moderato)",
+    "rock": "Matrici clastiche identificate",
     "geoCtx": "Analisi morfologica accurata basata sulla direzione della corrente.",
     "db_locale": "Analisi basata sul Torrente/Area: commenta la geologia locale reale e giustifica il voto.",
     "targets": [
-      { "num": 1, "x": 52, "y": 60, "localizzazione": "Ombra idraulica calcolata rispetto al vettore", "desc": "Sito ad alta densità detritica individuato correttamente a valle dell'ostacolo.", "pct": 45 }
+      { "num": 1, "x": 52, "y": 60, "localizzazione": "Ombra idraulica calcolata rispetto al vettore", "desc": "Sito ad alta densità detritica individuato correttamente.", "pct": 45 }
     ],
     "advice": [
       "Scava sul lato di riparo dall'energia del flusso seguendo l'orientamento indicato.",
@@ -581,7 +580,7 @@ async function executeAnalysis(b64, lat, lon){
         contents: [{
           parts: [
             { text: prompt },
-            { inlineData: { mimeType: 'image/jpeg', data: b64 } }
+            { inlineData: { `mimeType`: 'image/jpeg', data: b64 } }
           ]
         }]
       })
@@ -755,7 +754,7 @@ function resetScanner(){
   document.getElementById('cameraWrap').style.flex='0 0 42%';
   document.getElementById('resetBtn').style.display='none';
   document.getElementById('uploadBtn').style.display='block';
-  document.getElementById('flowSelectorWrap').style.display='flex'; // Ripristina selettore
+  document.getElementById('flowSelectorWrap').style.display='flex';
   document.getElementById('fileInputEl').value = '';
   setBtnState('ti-camera','Avvia Fotocamera');
   appState='idle';
