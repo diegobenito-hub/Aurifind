@@ -254,7 +254,6 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
   </div>
   <div class="status-bar" id="statusBar">In attesa di attivazione.</div>
   
-  <!-- SELETTORE PROSPETTIVA CORRENTE -->
   <div class="flow-selector-wrap" id="flowSelectorWrap">
     <div class="flow-title"><i class="ti ti-ripple"></i> Direzione scorrimento acqua nella foto:</div>
     <div class="flow-options">
@@ -336,7 +335,6 @@ function startGPS(){
     return;
   }
   
-  // Impostiamo un timer di sblocco: se entro 3.5 secondi il GPS non risponde, passiamo al piano B elastico
   let gpsTimeout = setTimeout(() => {
     fallbackGPS("Ricerca GPS prolungata (uso modalità rete)");
   }, 3500);
@@ -359,9 +357,8 @@ function startGPS(){
 function fallbackGPS(reason){
   const dot=document.getElementById('gpsDot');
   dot.className='gps-dot active';
-  dot.style.backgroundColor='var(--blue)'; // colore blu di fallback per far capire che è attivo ma simulato/di rete
+  dot.style.backgroundColor='var(--blue)'; 
   
-  // Coordinate generiche italiane stabili di fallback (Appennino/Alpi di default per cercatori d'oro)
   if(!gpsData) {
     gpsData = { latitude: 44.414167, longitude: 8.950000, accuracy: 999 }; 
     document.getElementById('gpsCoords').textContent="44.414167, 8.950000 (Rete)";
@@ -451,7 +448,6 @@ async function startCamera(){
     setStatus('Inquadra il letto del torrente e premi Scatta','ok');
     document.getElementById('mainBtn').disabled=false;
   }catch(e){
-    // SE IL BROWSER BLOCCA IL COMPONENTE VIDEO, PASSA DI COLPO AL CARICAMENTO NATIVO FILE SENZA CRASH
     setStatus('Fotocamera bloccata. Uso caricamento file.','err');
     document.getElementById('mainBtn').disabled=false;
     document.getElementById('uploadBtn').style.display='block';
@@ -570,243 +566,5 @@ async function executeAnalysis(b64, lat, lon){
     ? "La corrente scorre in senso FRONTALE (proviene dal fondo dell inquadratura e si muove VERSO il fotografo)." 
     : "La corrente scorre in senso di ALLONTANAMENTO (si muove partendo dal basso foto e va VERSO il fondo dell inquadratura).";
 
-  const prompt = "Sei un esperto Geologo minerario. L utente ha scattato una foto alle seguenti coordinate geografiche: Latitudine: " + lat + " | Longitudine: " + lon + ". Informazioni geografiche rilevate: " + geoInfoDinamica + ". VETTORE IDRAULICO IMPORTANTE: " + indicazioneCorrentePrompt + " Escludi la vegetazione verde dalle sponde. Calcola le ombre idrauliche di deposito dei massi coerentemente alla direzione della corrente indicata. Restituisci la risposta esclusivamente in formato JSON compatto senza alcun blocco di codice markdown (NON USARE i tre apici ```json) o altro testo prima e dopo l oggetto. Struttura: { 'pct': 45, 'tier': 'Probabilita Moderata', 'rock': 'Descrizione ciottoli', 'geoCtx': 'Contesto geomorfologico basato sulla corrente', 'db_locale': 'Dettagli storici geologia', 'targets': [{ 'num': 1, 'x': 50, 'y': 60, 'localizzazione': 'Dietro al masso principale', 'desc': 'Sacchetta di accumulo ottimale', 'pct': 60 }], 'advice': ['Campione di prova sul fondo', 'Evita le sponde sabbiose esterne'] }";
-
-  const lt=setInterval(()=>{document.getElementById('loadingTxt').textContent='Elaborazione ombre idrauliche detritiche...';},2050);
-
-  try {
-    const url = '[https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=](https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=)' + key;
-    const response = await fetch(url, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        contents: [{
-          parts: [
-            { text: prompt },
-            { inlineData: { mimeType: 'image/jpeg', data: b64 } }
-          ]
-        }]
-      })
-    });
-
-    clearInterval(lt);
-    document.getElementById('loadingOverlay').classList.remove('show');
-    document.getElementById('scanLine').classList.remove('active');
-    document.getElementById('mainBtn').disabled = false;
-
-    if(!response.ok) {
-       const errData = await response.json().catch(()=>({}));
-       throw new Error(errData?.error?.message || 'Risposta server fallita.');
-    }
-
-    const resData = await response.json();
-    let textResult = resData.candidates[0].content.parts[0].text;
-    textResult = textResult.replace(/
-```json/g, '').replace(/```/g, '').trim();
-    
-    const json = JSON.parse(textResult);
-
-    document.getElementById('probVal').textContent = json.pct + '%';
-    const pBar = document.getElementById('probBar');
-    pBar.style.width = json.pct + '%';
-    pBar.style.backgroundColor = pinColor(json.pct);
-    document.getElementById('probTier').textContent = json.tier;
-    document.getElementById('rockType').textContent = json.rock;
-    document.getElementById('geoCtx').textContent = json.geoCtx;
-    document.getElementById('dbText').textContent = json.db_locale;
-
-    const targetContainer = document.getElementById('targetContainer');
-    targetContainer.innerHTML = '';
-    
-    if(Array.isArray(json.targets)) {
-        currentTargetsGlobal = json.targets;
-        json.targets.forEach(tgt => {
-            const pin = document.createElement('div');
-            pin.className = 'visual-target';
-            pin.style.left = tgt.x + '%';
-            pin.style.top = tgt.y + '%';
-            pin.innerHTML = '<span class="tgt-lbl-num">' + tgt.num + '</span><span class="tgt-lbl-pct">' + tgt.pct + '%</span>';
-            overlay.appendChild(pin);
-
-            const row = document.createElement('div');
-            row.className = 'target-row';
-            row.innerHTML = `
-                <div class="target-num">${tgt.num}</div>
-                <div class="target-info">
-                    <div class="target-loc">${tgt.localizzazione}</div>
-                    <div class="target-desc">${tgt.desc}</div>
-                </div>
-                <div class="target-pct" style="color:${pinColor(tgt.pct)}">${tgt.pct}%</div>
-            `;
-            targetContainer.appendChild(row);
-        });
-    }
-
-    const listEl = document.getElementById('adviceList');
-    listEl.innerHTML = '';
-    if(Array.isArray(json.advice)){
-      json.advice.forEach(adv => {
-        const li = document.createElement('li');
-        li.textContent = adv;
-        listEl.appendChild(li);
-      });
-    }
-
-    document.getElementById('resultsPanel').style.display = 'flex';
-
-    const now = new Date();
-    const entry = {
-      pct: parseInt(json.pct) || 0,
-      tier: json.tier || 'N/A',
-      rock: json.rock || 'N/A',
-      lat: lat,
-      lon: lon,
-      date: now.toLocaleDateString('it-IT'),
-      time: now.toTimeString().slice(0,5)
-    };
-    sessionLog.push(entry);
-    localStorage.setItem('aurifind_log', JSON.stringify(sessionLog));
-    
-    addPin(entry); 
-    updateMapStats();
-    renderLog();
-    setBtnState('ti-refresh', 'Nuova Scansione');
-    document.getElementById('resetBtn').style.display='block';
-    appState = 'results';
-    setStatus('Analisi completata con successo! ok', 'ok');
-
-  } catch (error) {
-    clearInterval(lt);
-    document.getElementById('loadingOverlay').classList.remove('show');
-    document.getElementById('scanLine').classList.remove('active');
-    document.getElementById('mainBtn').disabled = false;
-    document.getElementById('uploadBtn').style.display='block';
-    document.getElementById('flowSelectorWrap').style.display='flex';
-    console.error(error);
-    setStatus('Errore: ' + error.message, 'err');
-  }
-}
-
-function downloadAnnotatedPhoto() {
-  const cv = document.getElementById('canvasEl');
-  const ctx = cv.getContext('2d');
-  const img = document.getElementById('previewImg');
-  
-  if (!img.src || currentTargetsGlobal.length === 0) {
-    alert("Nessuna foto disponibile.");
-    return;
-  }
-  
-  ctx.clearRect(0,0,cv.width,cv.height);
-  ctx.drawImage(img, 0, 0, cv.width, cv.height);
-  
-  currentTargetsGlobal.forEach(tgt => {
-    const pixelX = (tgt.x / 100) * cv.width;
-    const pixelY = (tgt.y / 100) * cv.height;
-    const radius = Math.max(20, cv.width * 0.022);
-    
-    ctx.beginPath();
-    ctx.arc(pixelX, pixelY, radius + 3, 0, 2 * Math.PI);
-    ctx.fillStyle = 'rgba(0,0,0,0.65)';
-    ctx.fill();
-    
-    ctx.beginPath();
-    ctx.arc(pixelX, pixelY, radius, 0, 2 * Math.PI);
-    ctx.fillStyle = '#1a1a18';
-    ctx.fill();
-    
-    ctx.lineWidth = Math.max(2.5, cv.width * 0.0035);
-    ctx.strokeStyle = '#EF9F27';
-    ctx.stroke();
-    
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.font = "bold " + Math.max(14, radius * 0.75) + "px 'Share Tech Mono', monospace";
-    ctx.fillStyle = '#EF9F27';
-    ctx.fillText(tgt.num, pixelX, pixelY - (radius * 0.22));
-    
-    ctx.font = "bold " + Math.max(10, radius * 0.52) + "px 'Share Tech Mono', monospace";
-    ctx.fillStyle = '#ffffff';
-    ctx.fillText(tgt.pct + '%', pixelX, pixelY + (radius * 0.38));
-  });
-  
-  ctx.fillStyle = 'rgba(0, 0, 0, 0.75)';
-  ctx.fillRect(0, cv.height - 40, cv.width, 40);
-  ctx.fillStyle = '#EF9F27';
-  ctx.font = "13px 'Share Tech Mono', monospace";
-  ctx.textAlign = 'left';
-  const gpsTxt = document.getElementById('gpsCoords').textContent;
-  ctx.fillText("AuriFind AI - Corrente: " + currentFlowDirection.toUpperCase() + " - GPS: " + gpsTxt, 16, cv.height - 15);
-  
-  const dataUrl = cv.toDataURL('image/jpeg', 0.9);
-  const link = document.createElement('a');
-  link.download = 'aurifind_scan_' + new Date().toISOString().slice(0,10) + '.jpg';
-  link.href = dataUrl;
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
-  setStatus('Immagine esportata! ok', 'ok');
-}
-
-function resetScanner(){
-  if(stream){stream.getTracks().forEach(t=>t.stop());stream=null;}
-  document.getElementById('videoEl').style.display='none';
-  document.getElementById('photoContainer').style.display='none';
-  document.getElementById('visualTargetsOverlay').innerHTML = '';
-  document.getElementById('camPlaceholder').style.display='flex';
-  document.getElementById('resultsPanel').style.display='none';
-  document.getElementById('cameraWrap').style.flex='0 0 42%';
-  document.getElementById('resetBtn').style.display='none';
-  document.getElementById('uploadBtn').style.display='block';
-  document.getElementById('flowSelectorWrap').style.display='flex';
-  document.getElementById('fileInputEl').value = '';
-  setBtnState('ti-camera','Avvia Fotocamera');
-  appState='idle';
-  setStatus('In attesa di scansione.');
-}
-
-function renderLog(){
-  const container=document.getElementById('logContent');
-  if(!sessionLog.length){
-    container.innerHTML=`<div class="log-hdr-row"><span class="log-hdr-title">Registro Scansioni</span></div><div class="log-empty"><i class="ti ti-notes-off" style="font-size:36px;opacity:.3"></i><p style="font-size:12px;opacity:.6;margin-top:6px">Nessuna voce in archivio</p></div>`;
-    return;
-  }
-  let h=`<div class="log-hdr-row"><span class="log-hdr-title">Scansioni effettuate (${sessionLog.length})</span><button class="log-clear" onclick="clearLog()">Svuota</button></div><div style="height:10px"></div>`;
-  sessionLog.slice().reverse().forEach(e=>{
-    const c=pinColor(e.pct);
-    h+=`<div class="log-item">
-      <div class="log-bar" style="background:${c}"></div>
-      <div class="log-body">
-        <div style="display:flex;justify-content:between;align-items:baseline;gap:6px"><span class="log-item-pct" style="color:${c}">${e.pct}%</span><span class="log-item-tier">${e.tier}</span></div>
-        <div class="log-item-rock">${e.rock}</div>
-        <div class="log-item-coords">${e.lat}, ${e.lon}</div>
-      </div>
-      <div class="log-item-time"><div>${e.date}</div><div>${e.time}</div></div>
-    </div>`;
-  });
-  container.innerHTML=h;
-}
-
-function clearLog(){
-  if(!confirm('Cancellare la cronologia?'))return;
-  sessionLog=[];localStorage.removeItem('aurifind_log');
-  if(map){scanMarkers.forEach(m=>map.removeLayer(m));scanMarkers=[];document.getElementById('mapEmpty').style.display='flex';}
-  renderLog();updateMapStats();setStatus('Cronologia svuotata');
-}
-
-function exportGPX(){
-  if(!sessionLog.length){alert('Nessun dato');return;}
-  let gpx=`<?xml version="1.0" encoding="UTF-8"?><gpx version="1.1" creator="AuriFind"><wpt>`;
-  sessionLog.forEach((e,i)=>{
-    if(e.lat==='N/A')return;
-    gpx+=`<wpt lat="${e.lat}" lon="${e.lon}"><name>GoldPoint ${e.pct}%</name><desc>${e.rock}</desc></wpt>`;
-  });
-  gpx+=`</wpt></gpx>`;
-  const blob=new Blob([gpx],{type:'application/gpx+xml'});
-  const url=URL.createObjectURL(blob);
-  const a=document.createElement('a');a.href=url;a.download=`aurifind_${new Date().toISOString().slice(0,10)}.gpx`;
-  document.body.appendChild(a);a.click();document.body.removeChild(a);
-}
-</script>
-</body>
-</html>
+  const prompt = "Sei un esperto Geologo minerario. L utente ha scattato una foto alle seguenti coordinate geografiche: Latitudine: " + lat + " | Longitudine: " + lon + ". Informazioni geografiche rilevate: " + geoInfoDinamica + ". VETTORE IDRAULICO IMPORTANTE: " + indicazioneCorrentePrompt + " Escludi la vegetazione verde dalle sponde. Calcola le ombre idrauliche di deposito dei massi coerentemente alla direzione della corrente indicata. Restituisci la risposta esclusivamente in formato JSON compatto senza alcun blocco di codice markdown (NON USARE i tre apici 
+http://googleusercontent.com/immersive_entry_chip/0
