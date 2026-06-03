@@ -22,11 +22,11 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
 .logo-name{font-size:16px;font-weight:700;letter-spacing:.04em}
 .logo-sub{font-size:9px;color:var(--muted);letter-spacing:.12em;text-transform:uppercase;margin-top:1px}
 .hdr-right{text-align:right;font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--muted)}
-.gps-bar{padding:8px 18px;background:var(--bg);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;flex-shrink:0}
+.gps-bar{padding:10px 18px;background:var(--bg);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;flex-shrink:0}
 .gps-dot{width:7px;height:7px;border-radius:50%;background:#555;flex-shrink:0;transition:background .3s}
 .gps-dot.active{background:var(--green);box-shadow:0 0 0 3px rgba(99,153,34,.25)}
 .gps-dot.searching{background:var(--gold);animation:blink 1.2s infinite}
-.gps-coords{font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--muted);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.gps-coords{font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--muted);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding-right:60px}
 .gps-acc{font-size:10px;color:var(--muted);white-space:nowrap}
 @keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
 .content{flex:1;position:relative;overflow:hidden;min-height:0}
@@ -64,32 +64,31 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
 .info-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .icard{background:var(--surface);border:1px solid var(--border);border-radius:9px;padding:11px}
 .icard-lbl{font-size:9px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:4px}
-.icard-val{font-size:13px;color:var(--text);font-weight:600;line-height:1.4}
-.section-title{font-size:11px;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);margin-bottom:6px;margin-top:4px;display:flex;align-items:center;gap:6px}
+.icard-val{font-size:13.5px;color:var(--text);font-weight:600;line-height:1.45}
+.section-title{font-size:11px;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);margin-bottom:2px;margin-top:4px;display:flex;align-items:center;gap:6px}
 .section-title i{font-size:14px;color:var(--gold)}
 .target-container{display:flex;flex-direction:column;gap:8px}
 .target-row{background:var(--surface);border:1px solid var(--border);border-radius:9px;padding:12px;display:flex;align-items:center;gap:12px}
 .target-num{width:26px;height:26px;background:var(--bg);border:2px solid var(--gold);color:var(--gold);border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Share Tech Mono',monospace;font-weight:700;font-size:13px;flex-shrink:0;box-shadow:0 0 4px rgba(0,0,0,0.5);}
 .target-info{flex:1;min-width:0}
-.target-loc{font-size:13px;font-weight:600;color:var(--text)}
-.target-desc{font-size:12px;color:var(--text);opacity:0.9;margin-top:3px;line-height:1.45}
+.target-loc{font-size:13.5px;font-weight:600;color:var(--text)}
+.target-desc{font-size:13px;color:var(--text);opacity:0.9;margin-top:4px;line-height:1.45}
 .target-pct{font-family:'Share Tech Mono',monospace;font-size:19px;font-weight:700;color:var(--gold);flex-shrink:0}
 .db-card{background:linear-gradient(135deg, var(--surface) 0%, #1e2530 100%);border:1px solid #2e384d;border-radius:11px;padding:12px}
-.db-text{font-size:13px;color:#cbd5e1;line-height:1.5}
+.db-text{font-size:13.5px;color:#cbd5e1;line-height:1.5}
 .advice-card{background:var(--surface);border:1px solid var(--border);border-radius:9px;padding:12px}
 .advice-list{list-style:none;display:flex;flex-direction:column;gap:6px}
-.advice-list li{font-size:13px;color:var(--text);padding-left:14px;position:relative;line-height:1.45}
+.advice-list li{font-size:13.5px;color:var(--text);padding-left:14px;position:relative;line-height:1.45}
 .advice-list li::before{content:'›';position:absolute;left:0;color:var(--gold);font-weight:700}
+.btn-inline-save{width:100%;background:var(--surface2);color:var(--gold);border:1px solid var(--gold);border-radius:10px;padding:12px;font-family:'Barlow',sans-serif;font-size:13.5px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;margin-top:4px;transition:background .2s;}
+.btn-inline-save:active{background:var(--border)}
 .map-view{position:absolute;inset:0;display:none;flex-direction:column}
 .map-view.active{display:flex}
 #mapEl{flex:1;min-height:0}
 .leaflet-container{background:#1a1a18}
 .leaflet-tile{filter:brightness(.8) saturate(.65)}
-.leaflet-popup-content-wrapper{background:var(--surface);color:var(--text);border:1px solid var(--border);border-radius:10px;box-shadow:none;font-family:'Barlow',sans-serif}
-.leaflet-popup-tip{background:var(--surface)}
-.leaflet-popup-close-button{color:var(--muted)!important}
-.map-stats{display:flex;gap:0;flex-shrink:0;border-top:1px solid var(--border)}
-.mstat{flex:1;text-align:center;padding:10px 0;border-right:1px solid var(--border);background:var(--surface)}
+.map-stats{display:flex;gap:0;flex-shrink:0;border-top:1px solid var(--border);padding-bottom:calc(env(safe-area-inset-bottom,0px) + 2px)}
+.mstat{flex:1;text-align:center;padding:12px 0;border-right:1px solid var(--border);background:var(--surface)}
 .mstat:last-child{border-right:none}
 .mstat-val{font-family:'Share Tech Mono',monospace;font-size:20px;color:var(--gold)}
 .mstat-lbl{font-size:9px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-top:2px}
@@ -106,7 +105,7 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
 .log-body{flex:1;min-width:0}
 .log-item-pct{font-family:'Share Tech Mono',monospace;font-size:22px}
 .log-item-tier{font-size:10px;color:var(--muted);margin-top:1px}
-.log-item-rock{font-size:13px;color:var(--text);margin-top:4px;line-height:1.35}
+.log-item-rock{font-size:13.5px;color:var(--text);margin-top:4px;line-height:1.35}
 .log-item-coords{font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--muted);margin-top:4px}
 .log-item-time{font-size:10px;color:var(--muted);white-space:nowrap;text-align:right;align-self:flex-start}
 .scanner-controls{padding:10px 14px;padding-bottom:calc(env(safe-area-inset-bottom,0px) + 10px);background:var(--surface);border-top:1px solid var(--border);display:flex;gap:10px;flex-shrink:0}
@@ -131,14 +130,13 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
 .key-setup p{font-size:13px;color:var(--muted);text-align:center;line-height:1.6}
 .key-setup input{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:14px;font-size:13px;color:var(--text);font-family:'Share Tech Mono',monospace;-webkit-appearance:none;outline:none}
 .key-setup .btn-save{width:100%;background:var(--gold);color:#1a1a18;border:none;border-radius:11px;padding:15px;font-size:15px;font-weight:700;font-family:'Barlow',sans-serif;cursor:pointer}
-.key-badge{position:absolute;top:8px;right:18px;font-size:9px;color:var(--muted);font-family:'Share Tech Mono',monospace;cursor:pointer;text-decoration:underline}
+.key-badge{position:absolute;top:10px;right:18px;font-size:10px;color:var(--muted);font-family:'Share Tech Mono',monospace;cursor:pointer;text-decoration:underline;z-index:10}
 
-/* MODIFIED TARGET LABELS FOR ULTRA-VISIBILITY ON ACCIDENTAL LIGHT/GREEN BG */
 .visual-target{
   position:absolute;
-  width:36px;
-  height:36px;
-  background:rgba(0, 0, 0, 0.75);
+  width:38px;
+  height:38px;
+  background:rgba(0, 0, 0, 0.8);
   border:2.5px solid var(--gold);
   color:var(--gold);
   border-radius:50%;
@@ -153,18 +151,18 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
 }
 .tgt-lbl-num{
   font-family:'Share Tech Mono',monospace;
-  font-size:13px;
+  font-size:14px;
   font-weight:900;
   line-height:1;
   text-shadow: 0 1px 2px #000;
 }
 .tgt-lbl-pct{
   font-family:'Share Tech Mono',monospace;
-  font-size:9px;
+  font-size:9.5px;
   font-weight:700;
   color:#fff;
   line-height:1;
-  margin-top:1px;
+  margin-top:2px;
 }
 </style>
 </head>
@@ -228,8 +226,11 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
         <div class="section-title"><i class="ti ti-list-check"></i> Strategia Operativa</div>
         <div class="advice-card">
           <ul class="advice-list" id="adviceList"></ul>
+          <button class="btn-inline-save" id="inlineSaveBtn" onclick="downloadAnnotatedPhoto()">
+             <i class="ti ti-download"></i> Salva Foto con Target e %
+          </button>
         </div>
-        <div style="height:10px"></div>
+        <div style="height:14px"></div>
       </div>
     </div>
     
@@ -252,7 +253,6 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
       <i class="ti ti-camera" id="btnIcon"></i><span id="btnText">Avvia Fotocamera</span>
     </button>
     <button class="btn-sec" id="uploadBtn" onclick="document.getElementById('fileInputEl').click()"><i class="ti ti-folder-open"></i></button>
-    <button class="btn-sec" id="savePhotoBtn" onclick="downloadAnnotatedPhoto()" style="display:none;background:var(--surface2);border-color:var(--gold);color:var(--gold);" title="Salva foto con Target e %"><i class="ti ti-download"></i></button>
     <button class="btn-sec" id="resetBtn" onclick="resetScanner()" style="display:none"><i class="ti ti-refresh"></i></button>
   </div>
   
@@ -281,7 +281,7 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
 let stream=null,appState='idle',gpsData=null;
 let sessionLog=JSON.parse(localStorage.getItem('aurifind_log')||'[]');
 let map=null,posMarker=null,scanMarkers=[];
-let currentTargetsGlobal = []; // Stores the current bounding/point targets to re-render on canvas download
+let currentTargetsGlobal = [];
 
 window.addEventListener('load',()=>{
   startClock(); startGPS(); renderLog(); updateMapStats();
@@ -294,7 +294,7 @@ function saveKey(){
   const k=document.getElementById('keyInput').value.trim();
   if(!k||!k.startsWith('AIza')){alert('Key non valida — deve iniziare con AIza');return;}
   localStorage.setItem('gemini_key',k);
-  document.getElementById('keySetup').style.display='none';
+  document.getElementById('keySetup').style.none';
   setStatus('API key salvata ✓','ok');
 }
 function getKey(){return localStorage.getItem('gemini_key')||'';}
@@ -376,7 +376,6 @@ async function handleMain(){
 async function startCamera(){
   document.getElementById('mainBtn').disabled=true;
   document.getElementById('uploadBtn').style.display='none';
-  document.getElementById('savePhotoBtn').style.display='none';
   document.getElementById('resultsPanel').style.display='none';
   document.getElementById('cameraWrap').style.flex='1';
   setStatus('Richiesta fotocamera…');
@@ -403,7 +402,7 @@ async function captureAndAnalyze(){
   const v=document.getElementById('videoEl');
   const cv=document.getElementById('canvasEl');
   
-  const maxW=1280, maxH=960; // Increased context resolution for precise detection
+  const maxW=1280, maxH=960;
   const ratio=Math.min(maxW/(v.videoWidth||800),maxH/(v.videoHeight||600));
   cv.width=Math.round((v.videoWidth||800)*ratio);
   cv.height=Math.round((v.videoHeight||600)*ratio);
@@ -435,7 +434,6 @@ function handleFileUpload(event){
     const testImg = new Image();
     testImg.src = imgDataUrl;
     testImg.onload = function() {
-      // Draw image onto canvas to standardize size before processing and encoding
       const cv=document.getElementById('canvasEl');
       const maxW=1280, maxH=960;
       const ratio=Math.min(maxW/testImg.width, maxH/testImg.height);
@@ -482,7 +480,6 @@ async function executeAnalysis(b64, lat, lon){
   document.getElementById('scanLine').classList.add('active');
   document.getElementById('mainBtn').disabled=true;
   document.getElementById('uploadBtn').style.display='none';
-  document.getElementById('savePhotoBtn').style.display='none';
   
   document.getElementById('loadingTxt').textContent='Incrocio mappe OSM ed estrazione idronimi reali…';
   const key=getKey();
@@ -585,9 +582,8 @@ async function executeAnalysis(b64, lat, lon){
     targetContainer.innerHTML = '';
     
     if(Array.isArray(json.targets)) {
-        currentTargetsGlobal = json.targets; // Save targets for the canvas drawing feature
+        currentTargetsGlobal = json.targets;
         json.targets.forEach(tgt => {
-            // Enhanced visual target labels on photo with number AND percent inside an ultra-visible badge
             const pin = document.createElement('div');
             pin.className = 'visual-target';
             pin.style.left = tgt.x + '%';
@@ -639,7 +635,6 @@ async function executeAnalysis(b64, lat, lon){
     renderLog();
     setBtnState('ti-refresh', 'Nuova Scansione');
     document.getElementById('resetBtn').style.display='block';
-    document.getElementById('savePhotoBtn').style.display='block'; // Enable photo save button
     appState = 'results';
     setStatus('Studio di dettaglio completato escludendo la vegetazione! ✓', 'ok');
 
@@ -654,7 +649,6 @@ async function executeAnalysis(b64, lat, lon){
   }
 }
 
-// NEW EXCLUSIVE FUNCTION TO MERGE PHOTOGRAPH AND TARGET LABELS + TARGET % ONTO CANVAS FOR EXPORT
 function downloadAnnotatedPhoto() {
   const cv = document.getElementById('canvasEl');
   const ctx = cv.getContext('2d');
@@ -665,58 +659,47 @@ function downloadAnnotatedPhoto() {
     return;
   }
   
-  // Redraw image onto clean canvas to make sure we don't scale it awkwardly
   ctx.clearRect(0,0,cv.width,cv.height);
   ctx.drawImage(img, 0, 0, cv.width, cv.height);
   
-  // Draw each target item natively onto the canvas before export
   currentTargetsGlobal.forEach(tgt => {
     const pixelX = (tgt.x / 100) * cv.width;
     const pixelY = (tgt.y / 100) * cv.height;
+    const radius = Math.max(20, cv.width * 0.022);
     
-    // Scale properties dynamically depending on the master canvas resolution
-    const radius = Math.max(18, cv.width * 0.02);
-    
-    // 1. Draw outer black drop shadow ring
     ctx.beginPath();
     ctx.arc(pixelX, pixelY, radius + 3, 0, 2 * Math.PI);
-    ctx.fillStyle = 'rgba(0,0,0,0.6)';
+    ctx.fillStyle = 'rgba(0,0,0,0.65)';
     ctx.fill();
     
-    // 2. Draw solid black fill card background
     ctx.beginPath();
     ctx.arc(pixelX, pixelY, radius, 0, 2 * Math.PI);
     ctx.fillStyle = '#1a1a18';
     ctx.fill();
     
-    // 3. Draw Gold dynamic border ring
-    ctx.lineWidth = Math.max(2.5, cv.width * 0.003);
+    ctx.lineWidth = Math.max(2.5, cv.width * 0.0035);
     ctx.strokeStyle = '#EF9F27';
     ctx.stroke();
     
-    // 4. Print Target Number text
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    ctx.font = `bold ${Math.max(13, radius * 0.75)}px 'Share Tech Mono', monospace`;
+    ctx.font = `bold ${Math.max(14, radius * 0.75)}px 'Share Tech Mono', monospace`;
     ctx.fillStyle = '#EF9F27';
-    ctx.fillText(tgt.num, pixelX, pixelY - (radius * 0.25));
+    ctx.fillText(tgt.num, pixelX, pixelY - (radius * 0.22));
     
-    // 5. Print Dig Probability % text underneath inside the target circle
-    ctx.font = `bold ${Math.max(9, radius * 0.5)}px 'Share Tech Mono', monospace`;
+    ctx.font = `bold ${Math.max(10, radius * 0.52)}px 'Share Tech Mono', monospace`;
     ctx.fillStyle = '#ffffff';
-    ctx.fillText(`${tgt.pct}%`, pixelX, pixelY + (radius * 0.35));
+    ctx.fillText(`${tgt.pct}%`, pixelX, pixelY + (radius * 0.38));
   });
   
-  // Add an elegant watermarked banner or coordinate metadata text to the bottom for professional log tracking
-  ctx.fillStyle = 'rgba(0, 0, 0, 0.65)';
-  ctx.fillRect(0, cv.height - 35, cv.width, 35);
+  ctx.fillStyle = 'rgba(0, 0, 0, 0.75)';
+  ctx.fillRect(0, cv.height - 40, cv.width, 40);
   ctx.fillStyle = '#EF9F27';
-  ctx.font = "12px 'Share Tech Mono', monospace";
+  ctx.font = "13px 'Share Tech Mono', monospace";
   ctx.textAlign = 'left';
   const gpsTxt = document.getElementById('gpsCoords').textContent;
-  ctx.fillText(`AuriFind Prospecting AI — GPS: ${gpsTxt}`, 15, cv.height - 12);
+  ctx.fillText(`AuriFind Prospecting AI — GPS: ${gpsTxt}`, 16, cv.height - 15);
   
-  // Trigger modern file save via virtual anchor injection
   const dataUrl = cv.toDataURL('image/jpeg', 0.9);
   const link = document.createElement('a');
   link.download = `aurifind_target_scan_${new Date().toISOString().slice(0,10)}.jpg`;
@@ -736,7 +719,6 @@ function resetScanner(){
   document.getElementById('resultsPanel').style.display='none';
   document.getElementById('cameraWrap').style.flex='0 0 42%';
   document.getElementById('resetBtn').style.display='none';
-  document.getElementById('savePhotoBtn').style.display='none'; // Hide download option
   document.getElementById('uploadBtn').style.display='block';
   document.getElementById('fileInputEl').value = '';
   setBtnState('ti-camera','Avvia Fotocamera');
