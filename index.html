@@ -294,7 +294,7 @@ function saveKey(){
   const k=document.getElementById('keyInput').value.trim();
   if(!k||!k.startsWith('AIza')){alert('Key non valida — deve iniziare con AIza');return;}
   localStorage.setItem('gemini_key',k);
-  document.getElementById('keySetup').style.none';
+  document.getElementById('keySetup').style.display='none';
   setStatus('API key salvata ✓','ok');
 }
 function getKey(){return localStorage.getItem('gemini_key')||'';}
@@ -510,33 +510,32 @@ async function executeAnalysis(b64, lat, lon){
   Longitudine: ${lon}
   Dati idrografici e cartografici reali estratti: ${geoInfoDinamica}
 
-  DIRETTIVE DI ATTENZIONE CRITICA PER LA SEPARAZIONE VEGETAZIONE / SPONDA SABBIOSO-CIOTTOLOSA:
-  1. LA VEGETAZIONE NON È ORO NE UN TARGET DI SCAVO: Isola completamente le aree verdi (foglie, cespugli, arbusti sponali, alghe o muschi sui massi). Non devi mai assegnare target di scavo o alte probabilità ad elementi di origine vegetale. Se un'area è verde ed è vegetazione viva, la sua percentuale di interesse minerario è 0%.
-  2. IDENTIFICAZIONE DEL VERO SEDIMENTO: Distingui rigidamente la sponda di sabbia (depositi fini sabbiosi, grigi o dorati per via di miche/quarzi che non sono oro) e le lenti di ciottoli grossolani stabili da campionare.
-  3. FLUIDODINAMICA: Concentra i micro-target (assegnando coordinate x, y precise espresse in percentuali da 0 a 100 all'interno della foto) ESCLUSIVAMENTE sulle trappole fisiche:
-     - Dietro i grandi massi nell'alveo (ombra idraulica).
-     - Nelle fessure visibili del bedrock.
-     - Sotto il primo strato (clasti embricati) delle barre ghiaiose interne della curva del torrente.
+  DIRETTIVE GEOMETRICHE E SPAZIALI CRITICHE (CORREZIONE ERRORE PRECEDENTE):
+  1. ANALISI DEI CORPI DI INQUADRATURA: Osserva attentamente la foto. Se la vegetazione verde (cespugli, alberi fitti) si trova ai lati (sponde esterne) e il torrente/fiume scorre al centro (striscia di acqua, sabbia e ciottoli chiari puliti), DEVI ignorare categoricamente le zone laterali verdi.
+  2. IDENTIFICAZIONE DEL VERO LETTO: Concentra i micro-target ESCLUSIVAMENTE sulle coordinate X, Y appartenenti alla porzione centrale o ovunque si trovi l'effettivo scorrimento idraulico e l'accumulo detritico fluviale. Qualsiasi target inserito sulla vegetazione viva o sulle fronde è un errore gravissimo (0% rilevanza).
+  3. FLUIDODINAMICA DEL LETTO: Identifica le trappole fisiche reali visibili nell'alveo pulito:
+     - Depositi e piccole barre di ciottoli interni al flusso.
+     - Zone di ombra idraulica immediatamente a valle dei grandi massi sommersi o affioranti nel centro della corrente.
+     - Lenti di sabbia nera o concentrazioni di minerali pesanti sul fondo del letto visibile.
   4. PESO STORICO CARTOGRAFICO: Adatta la stima globale ("pct") basandoti sulla ricchezza aurifera accertata del corso d'acqua rilevato (es. Graveglia ha una storia specifica legata a mineralizzazioni e manganese/solfuri ma con scarse lenti alluvionali aurifere canoniche rispetto ai fiumi piemontesi; valuta di conseguenza con precisione scientifica senza sbilanciarti se l'alveo non è un noto produttore storico di oro nativo alluvionale).
 
   Restituisci la tua risposta RIGOROSAMENTE in questo formato JSON compatto, senza marcatori markdown (vietato l'uso di \`\`\`json) e senza alcun testo prima o dopo l'oggetto:
   {
     "pct": 28,
-    "tier": "Livello di probabilità (es. Moderato - Deposito di sponda fluviale / Ombra idraulica selettiva)",
-    "rock": "Matrici clastiche identificate (es. Ciottoli serpentinitici, calcari ed esclusioni di vegetazione)",
-    "geoCtx": "Analisi morfologica accurata: differenziazione tra i depositi ghiaiosi utili e la vegetazione sponale non rilevante.",
+    "tier": "Livello di probabilità (es. Moderato - Alveo attivo centrale)",
+    "rock": "Matrici clastiche identificate (es. Ciottoli serpentinitici e sabbie fluviali lavate centrali)",
+    "geoCtx": "Analisi morfologica accurata: Individuazione corretta del corso d'acqua centrale con totale esclusione della vegetazione sponale laterale.",
     "db_locale": "Analisi basata sul Torrente/Area: commenta la geologia locale reale e giustifica il voto.",
     "targets": [
-      { "num": 1, "x": 45, "y": 70, "localizzazione": "Base d'ombra del blocco roccioso sommerso", "desc": "Punto ottimale di accumulo per gravità dei sedimenti ad alta densità.", "pct": 45 },
-      { "num": 2, "x": 80, "y": 55, "localizzazione": "Barra di deposito ciottolosa interna", "desc": "Ghiaia a granulometria eterogenea ideale per saggio profondo sotto il cappello superficiale.", "pct": 32 }
+      { "num": 1, "x": 50, "y": 65, "localizzazione": "Centro alveo - Ghiaie sotto corrente", "desc": "Punto di scorrimento centrale idoneo per saggio su depositi sommersi.", "pct": 42 }
     ],
     "advice": [
-      "Ignora completamente le sponde ricoperte da arbusti e vegetazione fluitata.",
-      "Campiona alla base dei massi angolosi stabili, scavando sotto i primi 20cm di ciottoli lavati."
+      "Lavora esclusivamente la fascia centrale ciottolosa libera da vegetazione.",
+      "Campiona i sedimenti intrappolati tra i ciottoli lavati al centro della corrente."
     ]
   }`;
 
-  const lt=setInterval(()=>{document.getElementById('loadingTxt').textContent='Analisi visiva avanzata (Vegetazione vs Sabbia)…';},2000);
+  const lt=setInterval(()=>{document.getElementById('loadingTxt').textContent='Analisi visiva spaziale (Centratura Alveo Activo)…';},2000);
 
   try {
     const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${key}`;
@@ -645,7 +644,7 @@ async function executeAnalysis(b64, lat, lon){
     document.getElementById('mainBtn').disabled = false;
     document.getElementById('uploadBtn').style.display='block';
     console.error(error);
-    setStatus('Errore di elaborazione: ' + error.message, 'err');
+    setStatus('Errore di micro-rilevamento geologico: ' + error.message, 'err');
   }
 }
 
