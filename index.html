@@ -56,29 +56,29 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
 .results-panel{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:12px 14px;display:none;flex-direction:column;gap:12px}
 .prob-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px}
 .prob-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
-.prob-lbl{font-size:9px;text-transform:uppercase;letter-spacing:.14em;color:var(--muted)}
-.prob-val{font-family:'Share Tech Mono',monospace;font-size:32px;color:var(--gold)}
-.prob-bar-bg{height:5px;background:var(--surface2);border-radius:3px;overflow:hidden}
+.prob-lbl{font-size:10px;text-transform:uppercase;letter-spacing:.14em;color:var(--muted)}
+.prob-val{font-family:'Share Tech Mono',monospace;font-size:34px;color:var(--gold)}
+.prob-bar-bg{height:6px;background:var(--surface2);border-radius:3px;overflow:hidden}
 .prob-bar{height:100%;border-radius:3px;width:0%;transition:width 1.2s ease}
-.prob-tier{font-size:10px;color:var(--muted);margin-top:5px;text-align:right}
+.prob-tier{font-size:11px;color:var(--muted);margin-top:5px;text-align:right}
 .info-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.icard{background:var(--surface);border:1px solid var(--border);border-radius:9px;padding:10px}
-.icard-lbl{font-size:9px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:3px}
-.icard-val{font-size:12px;color:var(--text);font-weight:500;line-height:1.35}
-.section-title{font-size:10px;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);margin-bottom:6px;margin-top:4px;display:flex;align-items:center;gap:6px}
+.icard{background:var(--surface);border:1px solid var(--border);border-radius:9px;padding:11px}
+.icard-lbl{font-size:9px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:4px}
+.icard-val{font-size:13px;color:var(--text);font-weight:600;line-height:1.4}
+.section-title{font-size:11px;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);margin-bottom:6px;margin-top:4px;display:flex;align-items:center;gap:6px}
 .section-title i{font-size:14px;color:var(--gold)}
 .target-container{display:flex;flex-direction:column;gap:8px}
-.target-row{background:var(--surface);border:1px solid var(--border);border-radius:9px;padding:10px;display:flex;align-items:center;gap:12px}
-.target-num{width:24px;height:24px;background:var(--surface2);border:1px solid var(--gold);color:var(--gold);border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Share Tech Mono',monospace;font-weight:700;font-size:12px;flex-shrink:0}
+.target-row{background:var(--surface);border:1px solid var(--border);border-radius:9px;padding:12px;display:flex;align-items:center;gap:12px}
+.target-num{width:26px;height:26px;background:var(--bg);border:2px solid var(--gold);color:var(--gold);border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Share Tech Mono',monospace;font-weight:700;font-size:13px;flex-shrink:0;box-shadow:0 0 4px rgba(0,0,0,0.5);}
 .target-info{flex:1;min-width:0}
-.target-loc{font-size:12px;font-weight:600;color:var(--text)}
-.target-desc{font-size:11px;color:var(--muted);margin-top:2px;line-height:1.4}
-.target-pct{font-family:'Share Tech Mono',monospace;font-size:18px;font-weight:700;color:var(--gold);flex-shrink:0}
+.target-loc{font-size:13px;font-weight:600;color:var(--text)}
+.target-desc{font-size:12px;color:var(--text);opacity:0.9;margin-top:3px;line-height:1.45}
+.target-pct{font-family:'Share Tech Mono',monospace;font-size:19px;font-weight:700;color:var(--gold);flex-shrink:0}
 .db-card{background:linear-gradient(135deg, var(--surface) 0%, #1e2530 100%);border:1px solid #2e384d;border-radius:11px;padding:12px}
-.db-text{font-size:12px;color:#cbd5e1;line-height:1.45}
+.db-text{font-size:13px;color:#cbd5e1;line-height:1.5}
 .advice-card{background:var(--surface);border:1px solid var(--border);border-radius:9px;padding:12px}
 .advice-list{list-style:none;display:flex;flex-direction:column;gap:6px}
-.advice-list li{font-size:12px;color:var(--text);padding-left:14px;position:relative;line-height:1.4}
+.advice-list li{font-size:13px;color:var(--text);padding-left:14px;position:relative;line-height:1.45}
 .advice-list li::before{content:'›';position:absolute;left:0;color:var(--gold);font-weight:700}
 .map-view{position:absolute;inset:0;display:none;flex-direction:column}
 .map-view.active{display:flex}
@@ -106,7 +106,7 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
 .log-body{flex:1;min-width:0}
 .log-item-pct{font-family:'Share Tech Mono',monospace;font-size:22px}
 .log-item-tier{font-size:10px;color:var(--muted);margin-top:1px}
-.log-item-rock{font-size:12px;color:var(--text);margin-top:4px;line-height:1.3}
+.log-item-rock{font-size:13px;color:var(--text);margin-top:4px;line-height:1.35}
 .log-item-coords{font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--muted);margin-top:4px}
 .log-item-time{font-size:10px;color:var(--muted);white-space:nowrap;text-align:right;align-self:flex-start}
 .scanner-controls{padding:10px 14px;padding-bottom:calc(env(safe-area-inset-bottom,0px) + 10px);background:var(--surface);border-top:1px solid var(--border);display:flex;gap:10px;flex-shrink:0}
@@ -132,8 +132,40 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
 .key-setup input{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:14px;font-size:13px;color:var(--text);font-family:'Share Tech Mono',monospace;-webkit-appearance:none;outline:none}
 .key-setup .btn-save{width:100%;background:var(--gold);color:#1a1a18;border:none;border-radius:11px;padding:15px;font-size:15px;font-weight:700;font-family:'Barlow',sans-serif;cursor:pointer}
 .key-badge{position:absolute;top:8px;right:18px;font-size:9px;color:var(--muted);font-family:'Share Tech Mono',monospace;cursor:pointer;text-decoration:underline}
-.visual-target{position:absolute;width:28px;height:28px;background:rgba(239,159,39,0.25);border:2px dashed var(--gold);color:var(--gold);border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Share Tech Mono',monospace;font-size:12px;font-weight:700;transform:translate(-50%, -50%);box-shadow:0 0 6px rgba(0,0,0,0.8);animation:pulseTarget 1.5s infinite alternate;z-index:6}
-@keyframes pulseTarget { from{transform:translate(-50%, -50%) scale(1);} to{transform:translate(-50%, -50%) scale(1.15);background:rgba(239,159,39,0.45);} }
+
+/* MODIFIED TARGET LABELS FOR ULTRA-VISIBILITY ON ACCIDENTAL LIGHT/GREEN BG */
+.visual-target{
+  position:absolute;
+  width:36px;
+  height:36px;
+  background:rgba(0, 0, 0, 0.75);
+  border:2.5px solid var(--gold);
+  color:var(--gold);
+  border-radius:50%;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  transform:translate(-50%, -50%);
+  box-shadow:0 0 8px rgba(0,0,0,1), inset 0 0 4px rgba(239,159,39,0.5);
+  z-index:6;
+  pointer-events:none;
+}
+.tgt-lbl-num{
+  font-family:'Share Tech Mono',monospace;
+  font-size:13px;
+  font-weight:900;
+  line-height:1;
+  text-shadow: 0 1px 2px #000;
+}
+.tgt-lbl-pct{
+  font-family:'Share Tech Mono',monospace;
+  font-size:9px;
+  font-weight:700;
+  color:#fff;
+  line-height:1;
+  margin-top:1px;
+}
 </style>
 </head>
 <body>
@@ -220,6 +252,7 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
       <i class="ti ti-camera" id="btnIcon"></i><span id="btnText">Avvia Fotocamera</span>
     </button>
     <button class="btn-sec" id="uploadBtn" onclick="document.getElementById('fileInputEl').click()"><i class="ti ti-folder-open"></i></button>
+    <button class="btn-sec" id="savePhotoBtn" onclick="downloadAnnotatedPhoto()" style="display:none;background:var(--surface2);border-color:var(--gold);color:var(--gold);" title="Salva foto con Target e %"><i class="ti ti-download"></i></button>
     <button class="btn-sec" id="resetBtn" onclick="resetScanner()" style="display:none"><i class="ti ti-refresh"></i></button>
   </div>
   
@@ -248,6 +281,7 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
 let stream=null,appState='idle',gpsData=null;
 let sessionLog=JSON.parse(localStorage.getItem('aurifind_log')||'[]');
 let map=null,posMarker=null,scanMarkers=[];
+let currentTargetsGlobal = []; // Stores the current bounding/point targets to re-render on canvas download
 
 window.addEventListener('load',()=>{
   startClock(); startGPS(); renderLog(); updateMapStats();
@@ -342,6 +376,7 @@ async function handleMain(){
 async function startCamera(){
   document.getElementById('mainBtn').disabled=true;
   document.getElementById('uploadBtn').style.display='none';
+  document.getElementById('savePhotoBtn').style.display='none';
   document.getElementById('resultsPanel').style.display='none';
   document.getElementById('cameraWrap').style.flex='1';
   setStatus('Richiesta fotocamera…');
@@ -368,12 +403,12 @@ async function captureAndAnalyze(){
   const v=document.getElementById('videoEl');
   const cv=document.getElementById('canvasEl');
   
-  const maxW=800, maxH=600;
+  const maxW=1280, maxH=960; // Increased context resolution for precise detection
   const ratio=Math.min(maxW/(v.videoWidth||800),maxH/(v.videoHeight||600));
   cv.width=Math.round((v.videoWidth||800)*ratio);
   cv.height=Math.round((v.videoHeight||600)*ratio);
   cv.getContext('2d').drawImage(v,0,0,cv.width,cv.height);
-  const b64=cv.toDataURL('image/jpeg',.7).split(',')[1];
+  const b64=cv.toDataURL('image/jpeg',.85).split(',')[1];
   
   if(stream){stream.getTracks().forEach(t=>t.stop());stream=null;}
   v.style.display='none';
@@ -396,11 +431,19 @@ function handleFileUpload(event){
   const reader = new FileReader();
   reader.onload = function(e){
     const imgDataUrl = e.target.result;
-    const b64 = imgDataUrl.split(',')[1];
     
     const testImg = new Image();
     testImg.src = imgDataUrl;
     testImg.onload = function() {
+      // Draw image onto canvas to standardize size before processing and encoding
+      const cv=document.getElementById('canvasEl');
+      const maxW=1280, maxH=960;
+      const ratio=Math.min(maxW/testImg.width, maxH/testImg.height);
+      cv.width=Math.round(testImg.width*ratio);
+      cv.height=Math.round(testImg.height*ratio);
+      cv.getContext('2d').drawImage(testImg,0,0,cv.width,cv.height);
+      const b64 = cv.toDataURL('image/jpeg',.85).split(',')[1];
+
       EXIF.getData(testImg, function() {
         let lat = null, lon = null;
         const latData = EXIF.getTag(this, "GPSLatitude");
@@ -432,12 +475,14 @@ async function executeAnalysis(b64, lat, lon){
   pi.src='data:image/jpeg;base64,'+b64;
   document.getElementById('photoContainer').style.display='block';
   overlay.innerHTML = ''; 
+  currentTargetsGlobal = [];
   
   document.getElementById('cameraWrap').style.flex='0 0 42%';
   document.getElementById('loadingOverlay').classList.add('show');
   document.getElementById('scanLine').classList.add('active');
   document.getElementById('mainBtn').disabled=true;
   document.getElementById('uploadBtn').style.display='none';
+  document.getElementById('savePhotoBtn').style.display='none';
   
   document.getElementById('loadingTxt').textContent='Incrocio mappe OSM ed estrazione idronimi reali…';
   const key=getKey();
@@ -462,35 +507,39 @@ async function executeAnalysis(b64, lat, lon){
      console.warn("Mappe OSM non raggiungibili, uso dati grezzi.");
   }
 
-  const prompt = `Sei un Ingegnere Minerario ed esperto Geologo da campo specializzato in prospezione alluvionale.
-  L'utente ha fotografato clasti, rocce o porzioni di alveo fluviale a queste coordinate geografiche reali:
+  const prompt = `Sei un Ingegnere Minerario ed esperto Geologo da campo specializzato in prospezione alluvionale e analisi lito-morfologica.
+  L'utente ha scattato una foto alle seguenti coordinate geografiche reali:
   Latitudine: ${lat}
   Longitudine: ${lon}
-  Dati idrografici e cartografici estratti in tempo reale dalle mappe: ${geoInfoDinamica}
+  Dati idrografici e cartografici reali estratti: ${geoInfoDinamica}
 
-  REQUISITI FONDAMENTALI DI VALUTAZIONE:
-  1. PESO STORICO COERENTE (MAPPA): Valuta attentamente la stringa dei dati cartografici e le coordinate. Se l'area appartiene a contesti auriferi conclamati storicamente (es. fiumi piemontesi come Elvo, Orco, Sesia, Ticino, Malone; o specifici distretti storici liguri (es. Gorzente), toscani o alpini), la percentuale ("pct") complessiva e i micro-target devono riflettere questa ricchezza, scalando decisamente verso l'alto (fino al 55-80% nei punti esatti di accumulo). Se l'area ha scarsa o nulla storia mineraria alluvionale, mantieni stime prudente o basse (10-25%).
-  2. FLUIDODINAMICA DI SCATTO (FOTO): L'inquadratura mostra il corso d'acqua catturato con la corrente che si allontana dall'osservatore (spalle alla corrente). Cerca attivamente i punti d'ombra idraulica dietro i massi sommersi, l'interno delle curve (punti di rilascio dei sedimenti pesanti), le fessure verticali esposte nel bedrock (bedrock cracks) o gli strati inferiori di strisce di ghiaia a granulometria eterogenea (sabbie nere magnetitiche). 
-  Assegna percentuali nettamente differenziate all'interno dello stesso frame: elevatissime nei punti di accumulo profondi e minime sulla sabbia fine mossa superficiale.
-  
+  DIRETTIVE DI ATTENZIONE CRITICA PER LA SEPARAZIONE VEGETAZIONE / SPONDA SABBIOSO-CIOTTOLOSA:
+  1. LA VEGETAZIONE NON È ORO NE UN TARGET DI SCAVO: Isola completamente le aree verdi (foglie, cespugli, arbusti sponali, alghe o muschi sui massi). Non devi mai assegnare target di scavo o alte probabilità ad elementi di origine vegetale. Se un'area è verde ed è vegetazione viva, la sua percentuale di interesse minerario è 0%.
+  2. IDENTIFICAZIONE DEL VERO SEDIMENTO: Distingui rigidamente la sponda di sabbia (depositi fini sabbiosi, grigi o dorati per via di miche/quarzi che non sono oro) e le lenti di ciottoli grossolani stabili da campionare.
+  3. FLUIDODINAMICA: Concentra i micro-target (assegnando coordinate x, y precise espresse in percentuali da 0 a 100 all'interno della foto) ESCLUSIVAMENTE sulle trappole fisiche:
+     - Dietro i grandi massi nell'alveo (ombra idraulica).
+     - Nelle fessure visibili del bedrock.
+     - Sotto il primo strato (clasti embricati) delle barre ghiaiose interne della curva del torrente.
+  4. PESO STORICO CARTOGRAFICO: Adatta la stima globale ("pct") basandoti sulla ricchezza aurifera accertata del corso d'acqua rilevato (es. Graveglia ha una storia specifica legata a mineralizzazioni e manganese/solfuri ma con scarse lenti alluvionali aurifere canoniche rispetto ai fiumi piemontesi; valuta di conseguenza con precisione scientifica senza sbilanciarti se l'alveo non è un noto produttore storico di oro nativo alluvionale).
+
   Restituisci la tua risposta RIGOROSAMENTE in questo formato JSON compatto, senza marcatori markdown (vietato l'uso di \`\`\`json) e senza alcun testo prima o dopo l'oggetto:
   {
-    "pct": 45,
-    "tier": "Livello di probabilità (es. Eccellente - Contesto Storico [Fiume Rilevato] + Trappola Idraulica)",
-    "rock": "Matrici rocciose e indicatori pesanti identificati",
-    "geoCtx": "Analisi fluidodinamica della porzione d'alveo inquadrata",
-    "db_locale": "Identificazione geologica reale basata sulla mappa: riporta se il corso d'acqua o la provincia estratti fanno parte di distretti minerari/alluvionali storici noti e spiega perché le percentuali sono state elevate o ridotte.",
+    "pct": 28,
+    "tier": "Livello di probabilità (es. Moderato - Deposito di sponda fluviale / Ombra idraulica selettiva)",
+    "rock": "Matrici clastiche identificate (es. Ciottoli serpentinitici, calcari ed esclusioni di vegetazione)",
+    "geoCtx": "Analisi morfologica accurata: differenziazione tra i depositi ghiaiosi utili e la vegetazione sponale non rilevante.",
+    "db_locale": "Analisi basata sul Torrente/Area: commenta la geologia locale reale e giustifica il voto.",
     "targets": [
-      { "num": 1, "x": 42, "y": 65, "localizzazione": "Dietro il masso principale (Ombra della corrente)", "desc": "Punto classico di rilascio di materiali pesanti ad alta densità.", "pct": 65 },
-      { "num": 2, "x": 70, "y": 30, "localizzazione": "Sabbia fine superficiale", "desc": "Deposito leggero post-piena, probabilità di accumulo profondo ridotta.", "pct": 15 }
+      { "num": 1, "x": 45, "y": 70, "localizzazione": "Base d'ombra del blocco roccioso sommerso", "desc": "Punto ottimale di accumulo per gravità dei sedimenti ad alta densità.", "pct": 45 },
+      { "num": 2, "x": 80, "y": 55, "localizzazione": "Barra di deposito ciottolosa interna", "desc": "Ghiaia a granulometria eterogenea ideale per saggio profondo sotto il cappello superficiale.", "pct": 32 }
     ],
     "advice": [
-      "Esegui un saggio profondo rimuovendo lo strato superficiale fino a raggiungere il livello dei ciottoli grossolani.",
-      "Concentra il lavaggio sul sedimento estratto dalla base dei blocchi più pesanti."
+      "Ignora completamente le sponde ricoperte da arbusti e vegetazione fluitata.",
+      "Campiona alla base dei massi angolosi stabili, scavando sotto i primi 20cm di ciottoli lavati."
     ]
   }`;
 
-  const lt=setInterval(()=>{document.getElementById('loadingTxt').textContent='Interrogazione intelligenza artificiale…';},2000);
+  const lt=setInterval(()=>{document.getElementById('loadingTxt').textContent='Analisi visiva avanzata (Vegetazione vs Sabbia)…';},2000);
 
   try {
     const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${key}`;
@@ -536,12 +585,14 @@ async function executeAnalysis(b64, lat, lon){
     targetContainer.innerHTML = '';
     
     if(Array.isArray(json.targets)) {
+        currentTargetsGlobal = json.targets; // Save targets for the canvas drawing feature
         json.targets.forEach(tgt => {
+            // Enhanced visual target labels on photo with number AND percent inside an ultra-visible badge
             const pin = document.createElement('div');
             pin.className = 'visual-target';
             pin.style.left = tgt.x + '%';
             pin.style.top = tgt.y + '%';
-            pin.textContent = tgt.num;
+            pin.innerHTML = `<span class="tgt-lbl-num">${tgt.num}</span><span class="tgt-lbl-pct">${tgt.pct}%</span>`;
             overlay.appendChild(pin);
 
             const row = document.createElement('div');
@@ -588,8 +639,9 @@ async function executeAnalysis(b64, lat, lon){
     renderLog();
     setBtnState('ti-refresh', 'Nuova Scansione');
     document.getElementById('resetBtn').style.display='block';
+    document.getElementById('savePhotoBtn').style.display='block'; // Enable photo save button
     appState = 'results';
-    setStatus('Analisi completata incrociando dati cartografici e fluidodinamici! ✓', 'ok');
+    setStatus('Studio di dettaglio completato escludendo la vegetazione! ✓', 'ok');
 
   } catch (error) {
     clearInterval(lt);
@@ -602,6 +654,79 @@ async function executeAnalysis(b64, lat, lon){
   }
 }
 
+// NEW EXCLUSIVE FUNCTION TO MERGE PHOTOGRAPH AND TARGET LABELS + TARGET % ONTO CANVAS FOR EXPORT
+function downloadAnnotatedPhoto() {
+  const cv = document.getElementById('canvasEl');
+  const ctx = cv.getContext('2d');
+  const img = document.getElementById('previewImg');
+  
+  if (!img.src || currentTargetsGlobal.length === 0) {
+    alert("Nessuna foto analizzata disponibile per il salvataggio.");
+    return;
+  }
+  
+  // Redraw image onto clean canvas to make sure we don't scale it awkwardly
+  ctx.clearRect(0,0,cv.width,cv.height);
+  ctx.drawImage(img, 0, 0, cv.width, cv.height);
+  
+  // Draw each target item natively onto the canvas before export
+  currentTargetsGlobal.forEach(tgt => {
+    const pixelX = (tgt.x / 100) * cv.width;
+    const pixelY = (tgt.y / 100) * cv.height;
+    
+    // Scale properties dynamically depending on the master canvas resolution
+    const radius = Math.max(18, cv.width * 0.02);
+    
+    // 1. Draw outer black drop shadow ring
+    ctx.beginPath();
+    ctx.arc(pixelX, pixelY, radius + 3, 0, 2 * Math.PI);
+    ctx.fillStyle = 'rgba(0,0,0,0.6)';
+    ctx.fill();
+    
+    // 2. Draw solid black fill card background
+    ctx.beginPath();
+    ctx.arc(pixelX, pixelY, radius, 0, 2 * Math.PI);
+    ctx.fillStyle = '#1a1a18';
+    ctx.fill();
+    
+    // 3. Draw Gold dynamic border ring
+    ctx.lineWidth = Math.max(2.5, cv.width * 0.003);
+    ctx.strokeStyle = '#EF9F27';
+    ctx.stroke();
+    
+    // 4. Print Target Number text
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.font = `bold ${Math.max(13, radius * 0.75)}px 'Share Tech Mono', monospace`;
+    ctx.fillStyle = '#EF9F27';
+    ctx.fillText(tgt.num, pixelX, pixelY - (radius * 0.25));
+    
+    // 5. Print Dig Probability % text underneath inside the target circle
+    ctx.font = `bold ${Math.max(9, radius * 0.5)}px 'Share Tech Mono', monospace`;
+    ctx.fillStyle = '#ffffff';
+    ctx.fillText(`${tgt.pct}%`, pixelX, pixelY + (radius * 0.35));
+  });
+  
+  // Add an elegant watermarked banner or coordinate metadata text to the bottom for professional log tracking
+  ctx.fillStyle = 'rgba(0, 0, 0, 0.65)';
+  ctx.fillRect(0, cv.height - 35, cv.width, 35);
+  ctx.fillStyle = '#EF9F27';
+  ctx.font = "12px 'Share Tech Mono', monospace";
+  ctx.textAlign = 'left';
+  const gpsTxt = document.getElementById('gpsCoords').textContent;
+  ctx.fillText(`AuriFind Prospecting AI — GPS: ${gpsTxt}`, 15, cv.height - 12);
+  
+  // Trigger modern file save via virtual anchor injection
+  const dataUrl = cv.toDataURL('image/jpeg', 0.9);
+  const link = document.createElement('a');
+  link.download = `aurifind_target_scan_${new Date().toISOString().slice(0,10)}.jpg`;
+  link.href = dataUrl;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  setStatus('Immagine annotata salvata in galleria! ✓', 'ok');
+}
+
 function resetScanner(){
   if(stream){stream.getTracks().forEach(t=>t.stop());stream=null;}
   document.getElementById('videoEl').style.display='none';
@@ -611,6 +736,7 @@ function resetScanner(){
   document.getElementById('resultsPanel').style.display='none';
   document.getElementById('cameraWrap').style.flex='0 0 42%';
   document.getElementById('resetBtn').style.display='none';
+  document.getElementById('savePhotoBtn').style.display='none'; // Hide download option
   document.getElementById('uploadBtn').style.display='block';
   document.getElementById('fileInputEl').value = '';
   setBtnState('ti-camera','Avvia Fotocamera');
@@ -644,7 +770,7 @@ function clearLog(){
   if(!confirm('Cancellare la cronologia?'))return;
   sessionLog=[];localStorage.removeItem('aurifind_log');
   if(map){scanMarkers.forEach(m=>map.removeLayer(m));scanMarkers=[];document.getElementById('mapEmpty').style.display='flex';}
-  renderLog();updateMapStats();setStatus('Cronologia svuotata');
+  renderLog();updateMapStats();setStatus('Cronologia vuota');
 }
 
 function exportGPX(){
