@@ -82,6 +82,14 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
 .advice-list li::before{content:'›';position:absolute;left:0;color:var(--gold);font-weight:700}
 .btn-inline-save{width:100%;background:var(--surface2);color:var(--gold);border:1px solid var(--gold);border-radius:10px;padding:12px;font-family:'Barlow',sans-serif;font-size:13.5px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;margin-top:4px;transition:background .2s;}
 .btn-inline-save:active{background:var(--border)}
+
+/* Selettore Direzione Corrente */
+.flow-selector-wrap{padding:10px 14px 4px 14px;background:var(--surface);border-top:1px solid var(--border);display:flex;flex-direction:column;gap:6px;flex-shrink:0}
+.flow-title{font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);display:flex;align-items:center;gap:4px}
+.flow-options{display:flex;background:var(--bg);border:1px solid var(--border);border-radius:9px;padding:2px}
+.flow-btn{flex:1;background:none;border:none;color:var(--muted);padding:8px;font-family:'Barlow',sans-serif;font-size:12px;font-weight:600;display:flex;align-items:center;justify-content:center;gap:6px;cursor:pointer;border-radius:7px;transition:all .2s}
+.flow-btn.active{background:var(--surface2);color:var(--gold);box-shadow:0 1px 3px rgba(0,0,0,0.3)}
+
 .map-view{position:absolute;inset:0;display:none;flex-direction:column}
 .map-view.active{display:flex}
 #mapEl{flex:1;min-height:0}
@@ -108,7 +116,7 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
 .log-item-rock{font-size:13.5px;color:var(--text);margin-top:4px;line-height:1.35}
 .log-item-coords{font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--muted);margin-top:4px}
 .log-item-time{font-size:10px;color:var(--muted);white-space:nowrap;text-align:right;align-self:flex-start}
-.scanner-controls{padding:10px 14px;padding-bottom:calc(env(safe-area-inset-bottom,0px) + 10px);background:var(--surface);border-top:1px solid var(--border);display:flex;gap:10px;flex-shrink:0}
+.scanner-controls{padding:6px 14px 10px 14px;padding-bottom:calc(env(safe-area-inset-bottom,0px) + 10px);background:var(--surface);display:flex;gap:10px;flex-shrink:0}
 .btn-main{flex:2;background:var(--gold);color:#1a1a18;border:none;border-radius:11px;padding:14px 16px;font-size:14px;font-weight:700;font-family:'Barlow',sans-serif;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;-webkit-appearance:none;transition:background .15s}
 .btn-main:active{background:var(--gold-dark)}
 .btn-main:disabled{background:#3a3a34;color:#666}
@@ -247,6 +255,18 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
   </div>
   <div class="status-bar" id="statusBar"></div>
   
+  <div class="flow-selector-wrap" id="flowSelectorWrap">
+    <div class="flow-title"><i class="ti ti-ripple"></i> Direzione scorrimento acqua nella foto:</div>
+    <div class="flow-options">
+      <button class="flow-btn active" id="flow-front" onclick="setFlowDirection('frontale')">
+        <i class="ti ti-arrow-down"></i> Corrente Frontale (Viene verso di me)
+      </button>
+      <button class="flow-btn" id="flow-away" onclick="setFlowDirection('allontanamento')">
+        <i class="ti ti-arrow-up"></i> In Allontanamento (Va via da me)
+      </button>
+    </div>
+  </div>
+
   <div class="scanner-controls" id="scannerControls">
     <input type="file" id="fileInputEl" accept="image/*" style="display:none" onchange="handleFileUpload(event)"/>
     <button class="btn-main" id="mainBtn" onclick="handleMain()">
@@ -282,6 +302,7 @@ let stream=null,appState='idle',gpsData=null;
 let sessionLog=JSON.parse(localStorage.getItem('aurifind_log')||'[]');
 let map=null,posMarker=null,scanMarkers=[];
 let currentTargetsGlobal = [];
+let currentFlowDirection = 'frontale'; // Variabile di stato per la corrente
 
 window.addEventListener('load',()=>{
   startClock(); startGPS(); renderLog(); updateMapStats();
@@ -298,6 +319,13 @@ function saveKey(){
   setStatus('API key salvata ✓','ok');
 }
 function getKey(){return localStorage.getItem('gemini_key')||'';}
+
+function setFlowDirection(dir) {
+  currentFlowDirection = dir;
+  document.getElementById('flow-front').className = 'flow-btn' + (dir === 'frontale' ? ' active' : '');
+  document.getElementById('flow-away').className = 'flow-btn' + (dir === 'allontanamento' ? ' active' : '');
+  setStatus('Vettore idraulico impostato: ' + (dir === 'frontale' ? 'Corrente Frontale' : 'In Allontanamento'), 'ok');
+}
 
 function startGPS(){
   const dot=document.getElementById('gpsDot');
@@ -319,6 +347,7 @@ function switchTab(tab){
   document.getElementById('logView').className='log-view'+(tab==='log'?' active':'');
   document.getElementById('scannerControls').style.display=tab==='scanner'?'flex':'none';
   document.getElementById('mapControls').style.display=tab==='map'?'flex':'none';
+  document.getElementById('flowSelectorWrap').style.display=(tab==='scanner' && appState!=='results')?'flex':'none';
   if(tab==='map'){initMap();setTimeout(()=>map&&map.invalidateSize(),150);}
   if(tab==='log')renderLog();
 }
@@ -389,7 +418,7 @@ async function startCamera(){
     document.getElementById('resetBtn').style.display='block';
     setBtnState('ti-camera-plus','Scatta e Analizza');
     appState='camera';
-    setStatus('Inquadra lito/sedimento voltandoti di spalle rispetto alla provenienza della corrente. › premi per analizzare','ok');
+    setStatus('Inquadra lito/sedimento impostando il senso dell'acqua. › premi per analizzare','ok');
     document.getElementById('mainBtn').disabled=false;
   }catch(e){
     setStatus('Fotocamera non accessibile: '+(e.name||e.message),'err');
@@ -480,6 +509,7 @@ async function executeAnalysis(b64, lat, lon){
   document.getElementById('scanLine').classList.add('active');
   document.getElementById('mainBtn').disabled=true;
   document.getElementById('uploadBtn').style.display='none';
+  document.getElementById('flowSelectorWrap').style.display='none'; // Nascondi durante analisi
   
   document.getElementById('loadingTxt').textContent='Incrocio mappe OSM ed estrazione idronimi reali…';
   const key=getKey();
@@ -497,45 +527,50 @@ async function executeAnalysis(b64, lat, lon){
             const village = addr.village || addr.town || addr.suburb || addr.city || '';
             const county = addr.county || addr.state || '';
             
-            geoInfoDinamica = `Corso d'acqua identificato dalle mappe: ${waterway || 'Non censito esplicitamente ma presente nel reticolo geometrico'}, Località antropica: ${village}, Provincia/Regione: ${county}.`;
+            geoInfoDinamica = `Corso d'acqua identificato dalle mappe: ${waterway || 'Non censito esplicitamente'}, Località: ${village}, Provincia/Regione: ${county}.`;
         }
     }
   } catch(geoErr) {
      console.warn("Mappe OSM non raggiungibili, uso dati grezzi.");
   }
 
+  // Costruiamo il testo descrittivo del vettore idraulico da dare a Gemini
+  const indicazioneCorrentePrompt = currentFlowDirection === 'frontale' 
+    ? "La corrente dell'acqua scorre in senso FRONTALE, ovvero proviene dal fondo dell'inquadratura (parte alta della foto) e si muove VERSO il fotografo (parte bassa della foto)." 
+    : "La corrente dell'acqua scorre in senso di ALLONTANAMENTO, ovvero si muove partendo dal fotografo (parte bassa della foto) e prosegue VERSO il fondo della prospettiva (parte alta della foto).";
+
   const prompt = `Sei un Ingegnere Minerario ed esperto Geologo da campo specializzato in prospezione alluvionale e analisi lito-morfologica.
   L'utente ha scattato una foto alle seguenti coordinate geografiche reali:
-  Latitudine: ${lat}
-  Longitudine: ${lon}
-  Dati idrografici e cartografici reali estratti: ${geoInfoDinamica}
+  Latitudine: ${lat} | Longitudine: ${lon}
+  Dati idrografici cartografici: ${geoInfoDinamica}
 
-  DIRETTIVE GEOMETRICHE E SPAZIALI CRITICHE (CORREZIONE ERRORE PRECEDENTE):
-  1. ANALISI DEI CORPI DI INQUADRATURA: Osserva attentamente la foto. Se la vegetazione verde (cespugli, alberi fitti) si trova ai lati (sponde esterne) e il torrente/fiume scorre al centro (striscia di acqua, sabbia e ciottoli chiari puliti), DEVI ignorare categoricamente le zone laterali verdi.
-  2. IDENTIFICAZIONE DEL VERO LETTO: Concentra i micro-target ESCLUSIVAMENTE sulle coordinate X, Y appartenenti alla porzione centrale o ovunque si trovi l'effettivo scorrimento idraulico e l'accumulo detritico fluviale. Qualsiasi target inserito sulla vegetazione viva o sulle fronde è un errore gravissimo (0% rilevanza).
-  3. FLUIDODINAMICA DEL LETTO: Identifica le trappole fisiche reali visibili nell'alveo pulito:
-     - Depositi e piccole barre di ciottoli interni al flusso.
-     - Zone di ombra idraulica immediatamente a valle dei grandi massi sommersi o affioranti nel centro della corrente.
-     - Lenti di sabbia nera o concentrazioni di minerali pesanti sul fondo del letto visibile.
-  4. PESO STORICO CARTOGRAFICO: Adatta la stima globale ("pct") basandoti sulla ricchezza aurifera accertata del corso d'acqua rilevato (es. Graveglia ha una storia specifica legata a mineralizzazioni e manganese/solfuri ma con scarse lenti alluvionali aurifere canoniche rispetto ai fiumi piemontesi; valuta di conseguenza con precisione scientifica senza sbilanciarti se l'alveo non è un noto produttore storico di oro nativo alluvionale).
+  VETTORE DINAMICO CORRENTE DICHIARATO DALL'UTENTE (FONDAMENTALE):
+  ${indicazioneCorrentePrompt}
+
+  DIRETTIVE GEOMETRICHE E FLUIDODINAMICHE CRITICHE:
+  1. FILTRO VEGETAZIONE ASSOLUTO: Isola ed escludi categoricamente le aree verdi laterali (arbusti, cespugli, fogliame delle sponde). Il torrente scorre al centro o dove si vede l'alveo ciottoloso/sabbioso chiaro. Non piazzare mai target sulle piante.
+  2. CALCOLO DELLE OMBRE IDRAULICHE SUI MASSI: Usa l'orientamento della corrente dichiarato sopra per trovare le esatte sacche di deposito deposizionale per gravità (oro nativo, magnetite):
+     - Se la corrente è FRONTALE (viene verso il basso), l'area di deposito protetta si trova IMMEDIATAMENTE SOTTO il masso in direzione del fondo foto (ovvero la parte a valle del masso nell'inquadratura).
+     - Se la corrente è IN ALLONTANAMENTO (va verso l'alto), l'area di deposito protetta si trova IMMEDIATAMENTE SOPRA il masso in direzione del fondo foto (ovvero la parte a valle dell'ostacolo nella linea di fuga).
+  3. EMBRICAZIONE E CLASTI: Identifica i punti di rallentamento della corrente all'interno del letto fluviale nudo e pulito (curve, cambi di pendenza).
 
   Restituisci la tua risposta RIGOROSAMENTE in questo formato JSON compatto, senza marcatori markdown (vietato l'uso di \`\`\`json) e senza alcun testo prima o dopo l'oggetto:
   {
-    "pct": 28,
-    "tier": "Livello di probabilità (es. Moderato - Alveo attivo centrale)",
-    "rock": "Matrici clastiche identificate (es. Ciottoli serpentinitici e sabbie fluviali lavate centrali)",
-    "geoCtx": "Analisi morfologica accurata: Individuazione corretta del corso d'acqua centrale con totale esclusione della vegetazione sponale laterale.",
+    "pct": 32,
+    "tier": "Livello di probabilità (es. Moderato - Deposito da ombra idraulica selettiva)",
+    "rock": "Matrici clastiche identificate (es. Ciottoli serpentinitici ed arenacei)",
+    "geoCtx": "Analisi morfologica accurata basata sulla direzione della corrente.",
     "db_locale": "Analisi basata sul Torrente/Area: commenta la geologia locale reale e giustifica il voto.",
     "targets": [
-      { "num": 1, "x": 50, "y": 65, "localizzazione": "Centro alveo - Ghiaie sotto corrente", "desc": "Punto di scorrimento centrale idoneo per saggio su depositi sommersi.", "pct": 42 }
+      { "num": 1, "x": 52, "y": 60, "localizzazione": "Ombra idraulica calcolata rispetto al vettore", "desc": "Sito ad alta densità detritica individuato correttamente a valle dell'ostacolo.", "pct": 45 }
     ],
     "advice": [
-      "Lavora esclusivamente la fascia centrale ciottolosa libera da vegetazione.",
-      "Campiona i sedimenti intrappolati tra i ciottoli lavati al centro della corrente."
+      "Scava sul lato di riparo dall'energia del flusso seguendo l'orientamento indicato.",
+      "Ignora le piante e concentrati sulla matrice ghiaiosa centrale."
     ]
   }`;
 
-  const lt=setInterval(()=>{document.getElementById('loadingTxt').textContent='Analisi visiva spaziale (Centratura Alveo Activo)…';},2000);
+  const lt=setInterval(()=>{document.getElementById('loadingTxt').textContent='Elaborazione ombre idrauliche basate sul vettore…';},2000);
 
   try {
     const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${key}`;
@@ -555,7 +590,7 @@ async function executeAnalysis(b64, lat, lon){
     clearInterval(lt);
     document.getElementById('loadingOverlay').classList.remove('show');
     document.getElementById('scanLine').classList.remove('active');
-    document.getElementById('mainBtn').disabled=false;
+    document.getElementById('mainBtn').disabled = false;
 
     if(!response.ok) {
        const errData = await response.json().catch(()=>({}));
@@ -635,7 +670,7 @@ async function executeAnalysis(b64, lat, lon){
     setBtnState('ti-refresh', 'Nuova Scansione');
     document.getElementById('resetBtn').style.display='block';
     appState = 'results';
-    setStatus('Studio di dettaglio completato escludendo la vegetazione! ✓', 'ok');
+    setStatus('Analisi completata integrando il vettore idraulico! ✓', 'ok');
 
   } catch (error) {
     clearInterval(lt);
@@ -643,8 +678,9 @@ async function executeAnalysis(b64, lat, lon){
     document.getElementById('scanLine').classList.remove('active');
     document.getElementById('mainBtn').disabled = false;
     document.getElementById('uploadBtn').style.display='block';
+    document.getElementById('flowSelectorWrap').style.display='flex';
     console.error(error);
-    setStatus('Errore di micro-rilevamento geologico: ' + error.message, 'err');
+    setStatus('Errore analisi: ' + error.message, 'err');
   }
 }
 
@@ -654,7 +690,7 @@ function downloadAnnotatedPhoto() {
   const img = document.getElementById('previewImg');
   
   if (!img.src || currentTargetsGlobal.length === 0) {
-    alert("Nessuna foto analizzata disponibile per il salvataggio.");
+    alert("Nessuna foto analizzata disponibile.");
     return;
   }
   
@@ -697,16 +733,16 @@ function downloadAnnotatedPhoto() {
   ctx.font = "13px 'Share Tech Mono', monospace";
   ctx.textAlign = 'left';
   const gpsTxt = document.getElementById('gpsCoords').textContent;
-  ctx.fillText(`AuriFind Prospecting AI — GPS: ${gpsTxt}`, 16, cv.height - 15);
+  ctx.fillText(`AuriFind AI — Vettore: ${currentFlowDirection.toUpperCase()} — GPS: ${gpsTxt}`, 16, cv.height - 15);
   
   const dataUrl = cv.toDataURL('image/jpeg', 0.9);
   const link = document.createElement('a');
-  link.download = `aurifind_target_scan_${new Date().toISOString().slice(0,10)}.jpg`;
+  link.download = `aurifind_scan_${new Date().toISOString().slice(0,10)}.jpg`;
   link.href = dataUrl;
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
-  setStatus('Immagine annotata salvata in galleria! ✓', 'ok');
+  setStatus('Immagine salvata! ✓', 'ok');
 }
 
 function resetScanner(){
@@ -719,6 +755,7 @@ function resetScanner(){
   document.getElementById('cameraWrap').style.flex='0 0 42%';
   document.getElementById('resetBtn').style.display='none';
   document.getElementById('uploadBtn').style.display='block';
+  document.getElementById('flowSelectorWrap').style.display='flex'; // Ripristina selettore
   document.getElementById('fileInputEl').value = '';
   setBtnState('ti-camera','Avvia Fotocamera');
   appState='idle';
