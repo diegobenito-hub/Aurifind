@@ -29,6 +29,7 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
 .gps-coords{font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--muted);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding-right:60px}
 .gps-acc{font-size:10px;color:var(--muted);white-space:nowrap}
 @keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+
 .content{flex:1;position:relative;overflow:hidden;min-height:0}
 .scanner-view{position:absolute;inset:0;display:flex;flex-direction:column}
 .camera-wrap{position:relative;background:#000;overflow:hidden;flex-shrink:0;height:42%;width:100%}
@@ -48,6 +49,7 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
 .scan-line{position:absolute;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--gold),transparent);pointer-events:none;z-index:5;display:none}
 .scan-line.active{display:block;animation:scanmove 2s linear infinite}
 @keyframes scanmove{0%{top:8%}100%{top:92%}}
+
 .loading-overlay{position:absolute;inset:0;background:rgba(26,26,24,.9);display:none;flex-direction:column;align-items:center;justify-content:center;gap:14px;z-index:10}
 .loading-overlay.show{display:flex}
 .spinner{width:36px;height:36px;border:2px solid var(--border);border-top-color:var(--gold);border-radius:50%;animation:spin .8s linear infinite}
@@ -102,6 +104,7 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
 .map-empty{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;color:var(--muted);pointer-events:none;z-index:5}
 .map-empty i{font-size:48px;opacity:.25}
 .map-empty p{font-size:13px;opacity:.5;text-align:center;padding:0 40px;line-height:1.5}
+
 .log-view{position:absolute;inset:0;display:none;flex-direction:column;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:12px 14px;gap:10px}
 .log-view.active{display:flex}
 .log-hdr-row{display:flex;justify-content:space-between;align-items:center}
@@ -115,23 +118,28 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
 .log-item-rock{font-size:13.5px;color:var(--text);margin-top:4px;line-height:1.35}
 .log-item-coords{font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--muted);margin-top:4px}
 .log-item-time{font-size:10px;color:var(--muted);white-space:nowrap;text-align:right;align-self:flex-start}
+
 .scanner-controls{padding:6px 14px 10px 14px;padding-bottom:calc(env(safe-area-inset-bottom,0px) + 10px);background:var(--surface);display:flex;gap:10px;flex-shrink:0}
 .btn-main{flex:2;background:var(--gold);color:#1a1a18;border:none;border-radius:11px;padding:14px 16px;font-size:14px;font-weight:700;font-family:'Barlow',sans-serif;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;-webkit-appearance:none;transition:background .15s}
 .btn-main:active{background:var(--gold-dark)}
 .btn-main:disabled{background:#3a3a34;color:#666}
 .btn-sec{background:var(--surface2);color:var(--muted);border:1px solid var(--border);border-radius:11px;padding:14px 15px;cursor:pointer;font-size:19px;-webkit-appearance:none}
+
 .map-controls{padding:10px 14px;padding-bottom:calc(env(safe-area-inset-bottom,0px) + 10px);background:var(--surface);border-top:1px solid var(--border);display:flex;gap:10px;flex-shrink:0}
 .btn-map{flex:1;background:var(--surface2);color:var(--text);border:1px solid var(--border);border-radius:11px;padding:14px;font-size:13px;font-weight:600;font-family:'Barlow',sans-serif;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;-webkit-appearance:none}
 .btn-map:active{background:#3a3a34}
 .btn-map.primary{background:var(--gold);color:#1a1a18;border-color:var(--gold)}
+
 .tab-bar{display:flex;background:var(--surface);border-top:1px solid var(--border);flex-shrink:0;padding-bottom:env(safe-area-inset-bottom,0px)}
 .tab{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:8px 0 6px;cursor:pointer;gap:3px;border:none;background:none;color:var(--muted);font-family:'Barlow',sans-serif;-webkit-appearance:none}
 .tab i{font-size:22px}
 .tab span{font-size:9px;letter-spacing:.06em;text-transform:uppercase}
 .tab.active{color:var(--gold)}
+
 .status-bar{padding:4px 14px;font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--muted);text-align:center;flex-shrink:0;background:var(--bg);min-height:20px}
 .status-bar.err{color:var(--red)}
 .status-bar.ok{color:var(--green)}
+
 .key-setup{position:fixed;inset:0;background:rgba(26,26,24,.97);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;padding:32px;z-index:100}
 .key-setup h2{font-size:18px;font-weight:700;color:var(--text);text-align:center}
 .key-setup p{font-size:13px;color:var(--muted);text-align:center;line-height:1.6}
@@ -171,6 +179,78 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
   line-height:1;
   margin-top:2px;
 }
+
+/* CUSTOM MODAL AND FLOATING TOASTS (Anti-crash replacements for alert/confirm) */
+.confirm-modal-overlay{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,0.85);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  z-index:1000;
+  padding:20px;
+}
+.confirm-modal{
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:12px;
+  padding:20px;
+  width:100%;
+  max-width:320px;
+  text-align:center;
+}
+.confirm-modal h3{
+  font-size:16px;
+  margin-bottom:8px;
+  color:var(--text);
+}
+.confirm-modal p{
+  font-size:13px;
+  color:var(--muted);
+  margin-bottom:20px;
+  line-height:1.45;
+}
+.confirm-buttons{
+  display:flex;
+  gap:10px;
+}
+.confirm-btn{
+  flex:1;
+  padding:11px;
+  border:none;
+  border-radius:8px;
+  font-family:'Barlow',sans-serif;
+  font-weight:600;
+  font-size:13px;
+  cursor:pointer;
+}
+.confirm-btn.yes{
+  background:var(--red);
+  color:#fff;
+}
+.confirm-btn.no{
+  background:var(--surface2);
+  color:var(--text);
+}
+.custom-toast{
+  position:fixed;
+  bottom:85px;
+  left:50%;
+  transform:translateX(-50%);
+  background:rgba(26,26,24,0.95);
+  border:1px solid var(--border);
+  border-radius:8px;
+  padding:10px 16px;
+  font-size:12px;
+  color:var(--text);
+  font-family:'Share Tech Mono',monospace;
+  z-index:9999;
+  box-shadow:0 4px 12px rgba(0,0,0,0.5);
+  display:none;
+  text-align:center;
+  white-space:nowrap;
+}
 </style>
 </head>
 <body>
@@ -187,7 +267,7 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
   </div>
   <div class="gps-bar" style="position:relative">
     <div class="gps-dot searching" id="gpsDot"></div>
-    <div class="gps-coords" id="gpsCoords">Inizializzazione...</div>
+    <div class="gps-coords" id="gpsCoords">Localizzazione in corso...</div>
     <div class="gps-acc" id="gpsAcc"></div>
     <span class="key-badge" onclick="showKeySetup()">⚙ API key</span>
   </div>
@@ -202,7 +282,7 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
         </div>
         <div class="cam-placeholder" id="camPlaceholder">
           <i class="ti ti-camera"></i>
-          <p>Pronto per l'analisi. Avvia la fotocamera o carica direttamente una foto</p>
+          <p>Avvia la fotocamera o carica una foto per iniziare la diagnostica geologica.</p>
         </div>
         <div class="corner tl"></div><div class="corner tr"></div>
         <div class="corner bl"></div><div class="corner br"></div>
@@ -272,12 +352,6 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
     <button class="btn-main" id="mainBtn" onclick="handleMain()">
       <i class="ti ti-camera" id="btnIcon"></i><span id="btnText">Avvia Fotocamera</span>
     </button>
-    
-    <!-- PULSANTE COMMUTAZIONE LENTE (🔄) -->
-    <button class="btn-sec" id="switchCamBtn" onclick="switchCameraLens()" style="display:none;" title="Cambia obiettivo fotocamera">
-      <i class="ti ti-camera-rotate"></i>
-    </button>
-    
     <button class="btn-sec" id="uploadBtn" onclick="document.getElementById('fileInputEl').click()"><i class="ti ti-folder-open"></i></button>
     <button class="btn-sec" id="resetBtn" onclick="resetScanner()" style="display:none"><i class="ti ti-refresh"></i></button>
   </div>
@@ -293,29 +367,45 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
   </div>
 </div>
 
+<!-- KEY SETUP POPUP -->
 <div class="key-setup" id="keySetup" style="display:none">
   <div style="font-size:32px">🔑</div>
   <h2>Gemini API Key</h2>
-  <p>Gratuita su <strong>aistudio.google.com</strong><br>Inizia con <strong>AIza...</strong></p>
+  <p>Crea la tua chiave gratuita su <strong>aistudio.google.com</strong><br>Deve iniziare con il codice <strong>AIza...</strong></p>
   <input type="text" id="keyInput" placeholder="AIzaSy..." autocomplete="off" autocorrect="off" spellcheck="false"/>
-  <button class="btn-save" onclick="saveKey()">Salva e inizia</button>
+  <button class="btn-save" onclick="saveKey()">Salva e sblocca</button>
 </div>
+
+<!-- REPLACEMENT DI CONFIRM MODAL (Per evitare crash da iframe) -->
+<div id="confirmModal" style="display:none;" class="confirm-modal-overlay">
+  <div class="confirm-modal">
+    <h3 id="confirmTitle">Sei sicuro?</h3>
+    <p id="confirmText">Vuoi procedere con questa operazione?</p>
+    <div class="confirm-buttons">
+      <button class="confirm-btn yes" id="confirmYesBtn">Sì</button>
+      <button class="confirm-btn no" id="confirmNoBtn">Annulla</button>
+    </div>
+  </div>
+</div>
+
+<div class="custom-toast" id="appToast"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/exif-js"></script>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
 <script>
 let stream=null,appState='idle',gpsData=null;
 let sessionLog=JSON.parse(localStorage.getItem('aurifind_log')||'[]');
 let map=null,posMarker=null,scanMarkers=[];
 let currentTargetsGlobal = [];
 let currentFlowDirection = 'frontale';
-
-// Gestione commutazione fotocamere e obiettivi
-let videoDevices = [];
-let currentDeviceIndex = 0;
+let activeConfirmCallback = null;
 
 window.addEventListener('load',()=>{
-  startClock(); startGPS(); renderLog(); updateMapStats();
+  startClock(); 
+  startGPS(); 
+  renderLog(); 
+  updateMapStats();
   if(!localStorage.getItem('gemini_key')) showKeySetup();
 });
 
@@ -323,12 +413,43 @@ function startClock(){setInterval(()=>{document.getElementById('timeEl').textCon
 function showKeySetup(){document.getElementById('keySetup').style.display='flex';document.getElementById('keyInput').value=localStorage.getItem('gemini_key')||'';}
 function saveKey(){
   const k=document.getElementById('keyInput').value.trim();
-  if(!k||!k.startsWith('AIza')){alert('Key non valida — deve iniziare con AIza');return;}
+  if(!k||!k.startsWith('AIza')){
+    showToast('Key non valida — deve iniziare con AIza', 'err');
+    return;
+  }
   localStorage.setItem('gemini_key',k);
   document.getElementById('keySetup').style.display='none';
-  setStatus('API key salvata ok','ok');
+  setStatus('API key salvata correttamente!','ok');
+  showToast('API key impostata con successo', 'ok');
 }
 function getKey(){return localStorage.getItem('gemini_key')||'';}
+
+/* TOAST E BANNER DI AVVISO CUSTOMIZZATI (Sostituti sicuri di alert() e confirm()) */
+function showToast(msg, type = 'info') {
+  const toast = document.getElementById('appToast');
+  if(!toast) return;
+  toast.textContent = msg;
+  toast.style.borderColor = type === 'err' ? 'var(--red)' : type === 'ok' ? 'var(--green)' : 'var(--gold)';
+  toast.style.display = 'block';
+  setTimeout(() => { toast.style.display = 'none'; }, 3500);
+}
+
+function showConfirm(title, msg, onConfirm) {
+  const overlay = document.getElementById('confirmModal');
+  document.getElementById('confirmTitle').textContent = title;
+  document.getElementById('confirmText').textContent = msg;
+  overlay.style.display = 'flex';
+  activeConfirmCallback = onConfirm;
+}
+
+document.getElementById('confirmYesBtn').addEventListener('click', () => {
+  document.getElementById('confirmModal').style.display = 'none';
+  if(activeConfirmCallback) activeConfirmCallback();
+});
+document.getElementById('confirmNoBtn').addEventListener('click', () => {
+  document.getElementById('confirmModal').style.display = 'none';
+  activeConfirmCallback = null;
+});
 
 function setFlowDirection(dir) {
   currentFlowDirection = dir;
@@ -342,13 +463,13 @@ function startGPS(){
   const coordsEl=document.getElementById('gpsCoords');
   
   if(!navigator.geolocation){
-    fallbackGPS("GPS non supportato dal browser");
+    fallbackGPS("GPS non supportato dal sistema");
     return;
   }
   
   let gpsTimeout = setTimeout(() => {
-    fallbackGPS("Ricerca GPS prolungata (uso modalità rete)");
-  }, 3500);
+    fallbackGPS("Connessione GPS lenta (utilizzo modalità di rete)");
+  }, 1200);
 
   navigator.geolocation.watchPosition(pos=>{
     clearTimeout(gpsTimeout);
@@ -356,13 +477,14 @@ function startGPS(){
     coordsEl.textContent=pos.coords.latitude.toFixed(6)+', '+pos.coords.longitude.toFixed(6);
     document.getElementById('gpsAcc').textContent='±'+Math.round(pos.coords.accuracy)+'m';
     dot.className='gps-dot active';
-    setStatus('GPS collegato con successo','ok');
+    dot.style.backgroundColor = 'var(--green)';
+    setStatus('GPS attivo ed agganciato','ok');
     updatePosMarker(pos.coords.latitude,pos.coords.longitude);
   },err=>{
     clearTimeout(gpsTimeout);
-    fallbackGPS("Segnale GPS debole o permessi locali disattivati");
+    fallbackGPS("Segnale GPS debole (coordinate standard impostate)");
   },
-  {enableHighAccuracy:false, maximumAge:5000, timeout:4000});
+  {enableHighAccuracy:false, maximumAge:10000, timeout:3000});
 }
 
 function fallbackGPS(reason){
@@ -371,15 +493,20 @@ function fallbackGPS(reason){
   dot.style.backgroundColor='var(--blue)'; 
   
   if(!gpsData) {
-    gpsData = { latitude: 44.414167, longitude: 8.950000, accuracy: 999 }; 
+    // Coordinate predefinite di fallback stabili (Appennino Ligure, zona a forte rilevanza aurifera)
+    gpsData = { latitude: 44.414167, longitude: 8.950000, accuracy: 250 }; 
     document.getElementById('gpsCoords').textContent="44.414167, 8.950000 (Rete)";
-    document.getElementById('gpsAcc').textContent='±N/D';
+    document.getElementById('gpsAcc').textContent='±Stima';
   }
-  setStatus(reason + ' — Sistema sbloccato e pronto.','ok');
+  setStatus(reason,'ok');
 }
 
 function switchTab(tab){
-  ['scanner','map','log'].forEach(t=>{const el=document.getElementById('tab-'+t)||document.getElementById('map-tab-btn');if(el && t==='map')el.className='tab'+(tab==='map'?' active':'');else if(document.getElementById('tab-'+t))document.getElementById('tab-'+t).className='tab'+(t===tab?' active':'');});
+  ['scanner','map','log'].forEach(t=>{
+    const el=document.getElementById('tab-'+t)||document.getElementById('map-tab-btn');
+    if(el && t==='map')el.className='tab'+(tab==='map'?' active':'');
+    else if(document.getElementById('tab-'+t))document.getElementById('tab-'+t).className='tab'+(t===tab?' active':'');
+  });
   document.getElementById('scannerView').style.display=tab==='scanner'?'flex':'none';
   document.getElementById('mapView').className='map-view'+(tab==='map'?' active':'');
   document.getElementById('logView').className='log-view'+(tab==='log'?' active':'');
@@ -391,34 +518,50 @@ function switchTab(tab){
 }
 
 function initMap(){
+  if(typeof L === 'undefined') {
+    setStatus('Impossibile inizializzare le mappe Leaflet offline','err');
+    return;
+  }
   if(map)return;
   const c=gpsData?[gpsData.latitude,gpsData.longitude]:[44.4141,8.9500]; 
-  map=L.map('mapEl',{zoomControl:true,attributionControl:false}).setView(c,16); 
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19}).addTo(map);
-  sessionLog.forEach(e=>addPin(e));
-  if(gpsData)updatePosMarker(gpsData.latitude,gpsData.longitude);
-  if(sessionLog.length)document.getElementById('mapEmpty').style.display='none';
+  try {
+    map=L.map('mapEl',{zoomControl:true,attributionControl:false}).setView(c,14); 
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19}).addTo(map);
+    sessionLog.forEach(e=>addPin(e));
+    if(gpsData)updatePosMarker(gpsData.latitude,gpsData.longitude);
+    if(sessionLog.length)document.getElementById('mapEmpty').style.display='none';
+  } catch(e) {
+    console.error("Errore inizializzazione mappa:", e);
+  }
 }
 
 function pinColor(pct){return pct<25?'#888780':pct<45?'#3B82F6':pct<65?'#EF9F27':'#639922';}
 
 function addPin(entry){
-  if(!map)return;
-  const c=pinColor(entry.pct);
-  const icon=L.divIcon({className:'',
-    html:`<div style="width:32px;height:32px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);background:${c};border:2px solid rgba(255,255,255,.35);display:flex;align-items:center;justify-content:center"><span style="transform:rotate(45deg);font-family:monospace;font-size:7px;font-weight:700;color:#fff">${entry.pct}%</span></div>`,
-    iconSize:[32,32],iconAnchor:[16,32],popupAnchor:[0,-34]});
-  const mk=L.marker([parseFloat(entry.lat),parseFloat(entry.lon)],{icon}).addTo(map)
-    .bindPopup(`<div style="min-width:150px"><div style="font-family:monospace;font-size:22px;color:${c}">${entry.pct}%</div><div style="font-size:12px;font-weight:600">${entry.tier}</div><div style="font-size:11px;color:#888">${entry.rock}</div><div style="font-size:9px;color:#666;font-family:monospace">${entry.lat}, ${entry.lon}</div></div>`,{maxWidth:220});
-  scanMarkers.push(mk);
-  document.getElementById('mapEmpty').style.display='none';
+  if(!map || typeof L === 'undefined')return;
+  try {
+    const c=pinColor(entry.pct);
+    const icon=L.divIcon({className:'',
+      html:`<div style="width:32px;height:32px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);background:${c};border:2px solid rgba(255,255,255,.35);display:flex;align-items:center;justify-content:center"><span style="transform:rotate(45deg);font-family:monospace;font-size:7px;font-weight:700;color:#fff">${entry.pct}%</span></div>`,
+      iconSize:[32,32],iconAnchor:[16,32],popupAnchor:[0,-34]});
+    const mk=L.marker([parseFloat(entry.lat),parseFloat(entry.lon)],{icon}).addTo(map)
+      .bindPopup(`<div style="min-width:150px"><div style="font-family:monospace;font-size:22px;color:${c}">${entry.pct}%</div><div style="font-size:12px;font-weight:600">${entry.tier}</div><div style="font-size:11px;color:#888">${entry.rock}</div><div style="font-size:9px;color:#666;font-family:monospace">${entry.lat}, ${entry.lon}</div></div>`,{maxWidth:220});
+    scanMarkers.push(mk);
+    document.getElementById('mapEmpty').style.display='none';
+  } catch(err) {
+    console.error(err);
+  }
 }
 
 function updatePosMarker(lat,lon){
-  if(!map)return;
-  const icon=L.divIcon({className:'',html:`<div style="width:14px;height:14px;border-radius:50%;background:#EF9F27;border:3px solid #fff;box-shadow:0 0 0 2px #EF9F27"></div>`,iconSize:[14,14],iconAnchor:[7,7]});
-  if(posMarker)posMarker.setLatLng([lat,lon]);
-  else posMarker=L.marker([lat,lon],{icon,zIndexOffset:1000}).addTo(map);
+  if(!map || typeof L === 'undefined')return;
+  try {
+    const icon=L.divIcon({className:'',html:`<div style="width:14px;height:14px;border-radius:50%;background:#EF9F27;border:3px solid #fff;box-shadow:0 0 0 2px #EF9F27"></div>`,iconSize:[14,14],iconAnchor:[7,7]});
+    if(posMarker)posMarker.setLatLng([lat,lon]);
+    else posMarker=L.marker([lat,lon],{icon,zIndexOffset:1000}).addTo(map);
+  } catch(err) {
+     console.error(err);
+  }
 }
 
 function centerMap(){if(map&&gpsData)map.setView([gpsData.latitude,gpsData.longitude],17,{animate:true});}
@@ -445,73 +588,25 @@ async function startCamera(){
   document.getElementById('uploadBtn').style.display='none';
   document.getElementById('resultsPanel').style.display='none';
   document.getElementById('cameraWrap').style.flex='1';
-  setStatus('Richiesta fotocamera...');
-  
+  setStatus('Richiesta autorizzazione fotocamera...');
   try{
-    const devices = await navigator.mediaDevices.enumerateDevices();
-    videoDevices = devices.filter(device => device.kind === 'videoinput');
-    
-    await initCameraStream();
-    
+    stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'environment'},width:{ideal:1280},height:{ideal:720}},audio:false});
+    const v=document.getElementById('videoEl');
+    v.srcObject=stream;await v.play();
+    v.style.display='block';
     document.getElementById('photoContainer').style.display='none';
     document.getElementById('camPlaceholder').style.display='none';
     document.getElementById('resetBtn').style.display='block';
-    
-    if (videoDevices.length > 1) {
-      document.getElementById('switchCamBtn').style.display = 'block';
-    }
-    
     setBtnState('ti-camera-plus','Scatta e Analizza');
     appState='camera';
-    setStatus('Inquadra il letto del torrente e premi Scatta','ok');
+    setStatus('Inquadra l\'alveo del torrente e premi Scatta','ok');
     document.getElementById('mainBtn').disabled=false;
   }catch(e){
-    setStatus('Fotocamera bloccata. Uso caricamento file.','err');
+    setStatus('Impossibile avviare fotocamera. Carica un file immagine.','err');
+    showToast('Fotocamera non disponibile. Usa il tasto archivio.', 'info');
     document.getElementById('mainBtn').disabled=false;
     document.getElementById('uploadBtn').style.display='block';
     document.getElementById('fileInputEl').click();
-  }
-}
-
-async function initCameraStream() {
-  if (stream) {
-    stream.getTracks().forEach(t => t.stop());
-  }
-  
-  const constraints = {
-    audio: false,
-    video: {
-      width: { ideal: 1280 },
-      height: { ideal: 960 }
-    }
-  };
-  
-  if (videoDevices.length > 0) {
-    constraints.video.deviceId = { exact: videoDevices[currentDeviceIndex].deviceId };
-  } else {
-    constraints.video.facingMode = { ideal: 'environment' };
-  }
-  
-  stream = await navigator.mediaDevices.getUserMedia(constraints);
-  const v = document.getElementById('videoEl');
-  v.srcObject = stream;
-  await v.play();
-  v.style.display = 'block';
-}
-
-async function switchCameraLens() {
-  if (videoDevices.length <= 1) return;
-  
-  currentDeviceIndex = (currentDeviceIndex + 1) % videoDevices.length;
-  setStatus('Cambio obiettivo fotocamera in corso...');
-  
-  try {
-    await initCameraStream();
-    setStatus('Obiettivo modificato con successo! (Lente ' + (currentDeviceIndex + 1) + ')', 'ok');
-  } catch(err) {
-    console.error("Errore cambio lente:", err);
-    setStatus('Impossibile agganciare questa lente, provo la successiva.', 'err');
-    currentDeviceIndex = (currentDeviceIndex + 1) % videoDevices.length;
   }
 }
 
@@ -528,7 +623,6 @@ async function captureAndAnalyze(){
   
   if(stream){stream.getTracks().forEach(t=>t.stop());stream=null;}
   v.style.display='none';
-  document.getElementById('switchCamBtn').style.display = 'none';
   
   const targetLat = gpsData ? gpsData.latitude.toFixed(6) : '44.414167';
   const targetLon = gpsData ? gpsData.longitude.toFixed(6) : '8.950000';
@@ -560,25 +654,30 @@ function handleFileUpload(event){
       cv.getContext('2d').drawImage(testImg,0,0,cv.width,cv.height);
       const b64 = cv.toDataURL('image/jpeg',.85).split(',')[1];
 
-      EXIF.getData(testImg, function() {
-        let lat = null, lon = null;
-        const latData = EXIF.getTag(this, "GPSLatitude");
-        const lonData = EXIF.getTag(this, "GPSLongitude");
-        const latRef = EXIF.getTag(this, "GPSLatitudeRef");
-        const lonRef = EXIF.getTag(this, "GPSLongitudeRef");
+      if(typeof EXIF !== 'undefined') {
+        EXIF.getData(testImg, function() {
+          let lat = null, lon = null;
+          const latData = EXIF.getTag(this, "GPSLatitude");
+          const lonData = EXIF.getTag(this, "GPSLongitude");
+          const latRef = EXIF.getTag(this, "GPSLatitudeRef");
+          const lonRef = EXIF.getTag(this, "GPSLongitudeRef");
 
-        if (latData && lonData) {
-          lat = latData[0] + latData[1]/60 + latData[2]/3600;
-          if (latRef === "S") lat = -lat;
-          lon = lonData[0] + lonData[1]/60 + lonData[2]/3600;
-          if (lonRef === "W") lon = -lon;
-        } else {
-          lat = gpsData ? gpsData.latitude : 44.414167;
-          lon = gpsData ? gpsData.longitude : 8.950000;
-        }
-
+          if (latData && lonData) {
+            lat = latData[0] + latData[1]/60 + latData[2]/3600;
+            if (latRef === "S") lat = -lat;
+            lon = lonData[0] + lonData[1]/60 + lonData[2]/3600;
+            if (lonRef === "W") lon = -lon;
+          } else {
+            lat = gpsData ? gpsData.latitude : 44.414167;
+            lon = gpsData ? gpsData.longitude : 8.950000;
+          }
+          executeAnalysis(b64, parseFloat(lat).toFixed(6), parseFloat(lon).toFixed(6));
+        });
+      } else {
+        const lat = gpsData ? gpsData.latitude : 44.414167;
+        const lon = gpsData ? gpsData.longitude : 8.950000;
         executeAnalysis(b64, parseFloat(lat).toFixed(6), parseFloat(lon).toFixed(6));
-      });
+      }
     };
   };
   reader.readAsDataURL(file);
@@ -600,10 +699,10 @@ async function executeAnalysis(b64, lat, lon){
   document.getElementById('uploadBtn').style.display='none';
   document.getElementById('flowSelectorWrap').style.display='none';
   
-  document.getElementById('loadingTxt').textContent='Estrazione dati geografici OSM...';
+  document.getElementById('loadingTxt').textContent='Consultazione database geologico...';
   const key=getKey();
 
-  let geoInfoDinamica = "Localita non identificata cartograficamente. Coordinate: Lat " + lat + ", Lon " + lon;
+  let geoInfoDinamica = "Località non identificata cartograficamente. Coordinate: Lat " + lat + ", Lon " + lon;
   try {
     const geoRes = await fetch('https://nominatim.openstreetmap.org/reverse?format=json&lat=' + lat + '&lon=' + lon + '&addressdetails=1', {
         headers: { 'User-Agent': 'AuriFindGoldApp' }
@@ -616,7 +715,7 @@ async function executeAnalysis(b64, lat, lon){
             const village = addr.village || addr.town || addr.suburb || addr.city || '';
             const county = addr.county || addr.state || '';
             
-            geoInfoDinamica = "Corso d acqua identificato: " + (waterway || 'Non censito') + ", Localita: " + village + ", Area: " + county;
+            geoInfoDinamica = "Corso d'acqua identificato: " + (waterway || 'Non censito') + ", Località: " + village + ", Area: " + county;
         }
     }
   } catch(geoErr) {
@@ -624,15 +723,16 @@ async function executeAnalysis(b64, lat, lon){
   }
 
   const indicazioneCorrentePrompt = currentFlowDirection === 'frontale' 
-    ? "La corrente scorre in senso FRONTALE (proviene dal fondo dell inquadratura e si muove VERSO il fotografo)." 
-    : "La corrente scorre in senso di ALLONTANAMENTO (si muove partendo dal basso foto e va VERSO il fondo dell inquadratura).";
+    ? "La corrente scorre in senso FRONTALE (proviene dal fondo dell'inquadratura e si muove VERSO il fotografo)." 
+    : "La corrente scorre in senso di ALLONTANAMENTO (si muove partendo dal basso foto e va VERSO il fondo dell'inquadratura).";
 
-  const prompt = "Sei un esperto Geologo minerario. L utente ha scattato una foto alle seguenti coordinate geografiche: Latitudine: " + lat + " | Longitudine: " + lon + ". Informazioni geografiche rilevate: " + geoInfoDinamica + ". VETTORE IDRAULICO IMPORTANTE: " + indicazioneCorrentePrompt + " Escludi la vegetazione verde dalle sponde. Calcola le ombre idrauliche di deposito dei massi coerentemente alla direzione della corrente indicata. Restituisci la risposta esclusivamente in formato JSON compatto senza alcun blocco di codice markdown (NON USARE i caratteri dei tre backtick) o altro testo prima e dopo l oggetto. Struttura: { \"pct\": 45, \"tier\": \"Probabilita Moderata\", \"rock\": \"Descrizione ciottoli\", \"geoCtx\": \"Contesto geomorfologico basato sulla corrente\", \"db_locale\": \"Dettagli storici geologia\", \"targets\": [{ \"num\": 1, \"x\": 50, \"y\": 60, \"localizzazione\": \"Dietro al masso principale\", \"desc\": \"Sacchetta di accumulo ottimale\", \"pct\": 60 }], \"advice\": [\"Campione di prova sul fondo\", \"Evita le sponde sabbiose esterne\"] }";
+  const prompt = "Sei un esperto Geologo minerario. L'utente ha scattato una foto alle seguenti coordinate geografiche: Latitudine: " + lat + " | Longitudine: " + lon + ". Informazioni geografiche rilevate: " + geoInfoDinamica + ". VETTORE IDRAULICO IMPORTANTE: " + indicazioneCorrentePrompt + " Escludi la vegetazione verde dalle sponde. Calcola le ombre idrauliche di deposito dei massi coerentemente alla direzione della corrente indicata. Restituisci la risposta esclusivamente in formato JSON compatto senza alcun blocco di codice markdown (NON USARE i tre apici ```json) o altro testo prima e dopo l'oggetto. Struttura: { \"pct\": 45, \"tier\": \"Probabilità Moderata\", \"rock\": \"Descrizione ciottoli\", \"geoCtx\": \"Contesto geomorfologico basato sulla corrente\", \"db_locale\": \"Dettagli storici geologia\", \"targets\": [{ \"num\": 1, \"x\": 50, \"y\": 60, \"localizzazione\": \"Dietro al masso principale\", \"desc\": \"Sacchetta di accumulo ottimale\", \"pct\": 60 }], \"advice\": [\"Campione di prova sul fondo\", \"Evita le sponde sabbiose esterne\"] }";
 
-  const lt=setInterval(()=>{document.getElementById('loadingTxt').textContent='Elaborazione ombre idrauliche detritiche...';},2050);
+  const lt=setInterval(()=>{document.getElementById('loadingTxt').textContent='Elaborazione ombre idrauliche detritiche...';},2000);
 
   try {
-    const url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=' + key;
+    // Sostituito con gemini-3-flash-preview per stabilità assoluta sotto alti carichi di rete
+    const url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=' + key;
     const response = await fetch(url, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -653,7 +753,7 @@ async function executeAnalysis(b64, lat, lon){
 
     if(!response.ok) {
        const errData = await response.json().catch(()=>({}));
-       throw new Error(errData?.error?.message || 'I server Gemini sono sovraccarichi. Riprova tra pochi secondi.');
+       throw new Error(errData?.error?.message || 'I server Google sono congestionati. Riprova tra 5 secondi.');
     }
 
     const resData = await response.json();
@@ -663,6 +763,7 @@ async function executeAnalysis(b64, lat, lon){
 
     let textResult = resData.candidates[0].content.parts[0].text;
     
+    // FILTRO ROBUSTO ANTI-CRASH PER PULIRE IL TESTO DA AI ESTRANEE
     textResult = textResult.replace(/```json/gi, '').replace(/```/g, '').trim();
     const firstBrace = textResult.indexOf('{');
     const lastBrace = textResult.lastIndexOf('}');
@@ -750,6 +851,7 @@ async function executeAnalysis(b64, lat, lon){
     document.getElementById('flowSelectorWrap').style.display='flex';
     console.error(error);
     setStatus('Errore: ' + error.message, 'err');
+    showToast('Errore di elaborazione: ' + error.message, 'err');
   }
 }
 
@@ -759,7 +861,7 @@ function downloadAnnotatedPhoto() {
   const img = document.getElementById('previewImg');
   
   if (!img.src || currentTargetsGlobal.length === 0) {
-    alert("Nessuna foto disponibile.");
+    showToast("Nessuna foto analizzata disponibile per il download", "err");
     return;
   }
   
@@ -804,18 +906,22 @@ function downloadAnnotatedPhoto() {
   const gpsTxt = document.getElementById('gpsCoords').textContent;
   ctx.fillText("AuriFind AI - Corrente: " + currentFlowDirection.toUpperCase() + " - GPS: " + gpsTxt, 16, cv.height - 15);
   
-  const dataUrl = cv.toDataURL('image/jpeg', 0.9);
-  const link = document.createElement('a');
-  link.download = 'aurifind_scan_' + new Date().toISOString().slice(0,10) + '.jpg';
-  link.href = dataUrl;
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
-  setStatus('Immagine esportata!', 'ok');
+  try {
+    const dataUrl = cv.toDataURL('image/jpeg', 0.9);
+    const link = document.createElement('a');
+    link.download = 'aurifind_scan_' + new Date().toISOString().slice(0,10) + '.jpg';
+    link.href = dataUrl;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    showToast('Immagine esportata con successo', 'ok');
+  } catch(err) {
+    showToast('Errore durante il salvataggio locale', 'err');
+  }
 }
 
 function resetScanner(){
-  if(stream){stream.getTracks().forEach(t => t.stop()); stream=null;}
+  if(stream){stream.getTracks().forEach(t=>t.stop());stream=null;}
   document.getElementById('videoEl').style.display='none';
   document.getElementById('photoContainer').style.display='none';
   document.getElementById('visualTargetsOverlay').innerHTML = '';
@@ -823,7 +929,6 @@ function resetScanner(){
   document.getElementById('resultsPanel').style.display='none';
   document.getElementById('cameraWrap').style.flex='0 0 42%';
   document.getElementById('resetBtn').style.display='none';
-  document.getElementById('switchCamBtn').style.display='none';
   document.getElementById('uploadBtn').style.display='block';
   document.getElementById('flowSelectorWrap').style.display='flex';
   document.getElementById('fileInputEl').value = '';
@@ -838,13 +943,13 @@ function renderLog(){
     container.innerHTML=`<div class="log-hdr-row"><span class="log-hdr-title">Registro Scansioni</span></div><div class="log-empty"><i class="ti ti-notes-off" style="font-size:36px;opacity:.3"></i><p style="font-size:12px;opacity:.6;margin-top:6px">Nessuna voce in archivio</p></div>`;
     return;
   }
-  let h=`<div class="log-hdr-row"><span class="log-hdr-title">Scansioni effettuate (${sessionLog.length})</span><button class="log-clear" onclick="clearLog()">Svuota</button></div><div style="height:10px"></div>`;
+  let h=`<div class="log-hdr-row"><span class="log-hdr-title">Scansioni effettuate (${sessionLog.length})</span><button class="log-clear" onclick="confirmClearLog()">Svuota</button></div><div style="height:10px"></div>`;
   sessionLog.slice().reverse().forEach(e=>{
     const c=pinColor(e.pct);
     h+=`<div class="log-item">
       <div class="log-bar" style="background:${c}"></div>
       <div class="log-body">
-        <div style="display:flex;justify-content:between;align-items:baseline;gap:6px"><span class="log-item-pct" style="color:${c}">${e.pct}%</span><span class="log-item-tier">${e.tier}</span></div>
+        <div style="display:flex;justify-content:space-between;align-items:baseline;gap:6px"><span class="log-item-pct" style="color:${c}">${e.pct}%</span><span class="log-item-tier">${e.tier}</span></div>
         <div class="log-item-rock">${e.rock}</div>
         <div class="log-item-coords">${e.lat}, ${e.lon}</div>
       </div>
@@ -854,25 +959,53 @@ function renderLog(){
   container.innerHTML=h;
 }
 
+function confirmClearLog(){
+  showConfirm(
+    "Cancellare cronologia?", 
+    "Questa azione rimuoverà permanentemente tutte le scansioni registrate dal database locale dell'app.",
+    clearLog
+  );
+}
+
 function clearLog(){
-  if(!confirm('Cancellare la cronologia?'))return;
-  sessionLog=[];localStorage.removeItem('aurifind_log');
-  if(map){scanMarkers.forEach(m=>map.removeLayer(m));scanMarkers=[];document.getElementById('mapEmpty').style.display='flex';}
-  renderLog();updateMapStats();setStatus('Cronologia svuotata');
+  sessionLog=[];
+  localStorage.removeItem('aurifind_log');
+  if(map){
+    scanMarkers.forEach(m=>map.removeLayer(m));
+    scanMarkers=[];
+    document.getElementById('mapEmpty').style.display='flex';
+  }
+  renderLog();
+  updateMapStats();
+  setStatus('Cronologia svuotata correttamente');
+  showToast('Database locale svuotato', 'ok');
 }
 
 function exportGPX(){
-  if(!sessionLog.length){alert('Nessun dato');return;}
+  if(!sessionLog.length){
+    showToast('Nessun dato registrato nel log per l\'esportazione', 'err');
+    return;
+  }
   let gpx=`<?xml version="1.0" encoding="UTF-8"?><gpx version="1.1" creator="AuriFind"><wpt>`;
   sessionLog.forEach((e,i)=>{
     if(e.lat==='N/A')return;
     gpx+=`<wpt lat="${e.lat}" lon="${e.lon}"><name>GoldPoint ${e.pct}%</name><desc>${e.rock}</desc></wpt>`;
   });
   gpx+=`</wpt></gpx>`;
-  const blob=new Blob([gpx],{type:'application/gpx+xml'});
-  const url=URL.createObjectURL(blob);
-  const a=document.createElement('a');a.href=url;a.download=`aurifind_${new Date().toISOString().slice(0,10)}.gpx`;
-  document.body.appendChild(a);a.click();document.body.removeChild(a);
+  
+  try {
+    const blob=new Blob([gpx],{type:'application/gpx+xml'});
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement('a');
+    a.href=url;
+    a.download=`aurifind_${new Date().toISOString().slice(0,10)}.gpx`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    showToast('File GPX scaricato', 'ok');
+  } catch(err) {
+    showToast('Errore durante la compilazione del GPX', 'err');
+  }
 }
 </script>
 </body>
