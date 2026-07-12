@@ -180,7 +180,6 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
   margin-top:2px;
 }
 
-/* CUSTOM MODAL AND FLOATING TOASTS (Anti-crash replacements for alert/confirm) */
 .confirm-modal-overlay{
   position:fixed;
   inset:0;
@@ -424,7 +423,6 @@ function saveKey(){
 }
 function getKey(){return localStorage.getItem('gemini_key')||'';}
 
-/* TOAST E BANNER DI AVVISO CUSTOMIZZATI (Sostituti sicuri di alert() e confirm()) */
 function showToast(msg, type = 'info') {
   const toast = document.getElementById('appToast');
   if(!toast) return;
@@ -493,7 +491,6 @@ function fallbackGPS(reason){
   dot.style.backgroundColor='var(--blue)'; 
   
   if(!gpsData) {
-    // Coordinate predefinite di fallback stabili (Appennino Ligure, zona a forte rilevanza aurifera)
     gpsData = { latitude: 44.414167, longitude: 8.950000, accuracy: 250 }; 
     document.getElementById('gpsCoords').textContent="44.414167, 8.950000 (Rete)";
     document.getElementById('gpsAcc').textContent='±Stima';
@@ -731,8 +728,8 @@ async function executeAnalysis(b64, lat, lon){
   const lt=setInterval(()=>{document.getElementById('loadingTxt').textContent='Elaborazione ombre idrauliche detritiche...';},2000);
 
   try {
-    // Sostituito con gemini-3-flash-preview per stabilità assoluta sotto alti carichi di rete
-    const url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=' + key;
+    // Utilizzo del modello stabile gemini-1.5-flash
+    const url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=' + key;
     const response = await fetch(url, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -753,7 +750,7 @@ async function executeAnalysis(b64, lat, lon){
 
     if(!response.ok) {
        const errData = await response.json().catch(()=>({}));
-       throw new Error(errData?.error?.message || 'I server Google sono congestionati. Riprova tra 5 secondi.');
+       throw new Error(errData?.error?.message || 'I server Gemini sono sovraccarichi. Riprova tra pochi secondi.');
     }
 
     const resData = await response.json();
@@ -763,7 +760,6 @@ async function executeAnalysis(b64, lat, lon){
 
     let textResult = resData.candidates[0].content.parts[0].text;
     
-    // FILTRO ROBUSTO ANTI-CRASH PER PULIRE IL TESTO DA AI ESTRANEE
     textResult = textResult.replace(/```json/gi, '').replace(/```/g, '').trim();
     const firstBrace = textResult.indexOf('{');
     const lastBrace = textResult.lastIndexOf('}');
@@ -851,53 +847,60 @@ async function executeAnalysis(b64, lat, lon){
     document.getElementById('flowSelectorWrap').style.display='flex';
     console.error(error);
     setStatus('Errore: ' + error.message, 'err');
-    showToast('Errore di elaborazione: ' + error.message, 'err');
   }
 }
 
-function downloadAnnotatedPhoto() {
+async function downloadAnnotatedPhoto() {
   const cv = document.getElementById('canvasEl');
   const ctx = cv.getContext('2d');
   const img = document.getElementById('previewImg');
   
-  if (!img.src || currentTargetsGlobal.length === 0) {
-    showToast("Nessuna foto analizzata disponibile per il download", "err");
+  if (!img.src || img.getAttribute('src') === "") {
+    showToast("Nessuna foto disponibile per il salvataggio.", "err");
     return;
   }
   
-  ctx.clearRect(0,0,cv.width,cv.height);
+  // Imposta le dimensioni effettive del canvas in base alle dimensioni reali dell'immagine caricata
+  cv.width = img.naturalWidth || img.width || 1280;
+  cv.height = img.naturalHeight || img.height || 960;
+  
+  ctx.clearRect(0, 0, cv.width, cv.height);
   ctx.drawImage(img, 0, 0, cv.width, cv.height);
   
-  currentTargetsGlobal.forEach(tgt => {
-    const pixelX = (tgt.x / 100) * cv.width;
-    const pixelY = (tgt.y / 100) * cv.height;
-    const radius = Math.max(20, cv.width * 0.022);
-    
-    ctx.beginPath();
-    ctx.arc(pixelX, pixelY, radius + 3, 0, 2 * Math.PI);
-    ctx.fillStyle = 'rgba(0,0,0,0.65)';
-    ctx.fill();
-    
-    ctx.beginPath();
-    ctx.arc(pixelX, pixelY, radius, 0, 2 * Math.PI);
-    ctx.fillStyle = '#1a1a18';
-    ctx.fill();
-    
-    ctx.lineWidth = Math.max(2.5, cv.width * 0.0035);
-    ctx.strokeStyle = '#EF9F27';
-    ctx.stroke();
-    
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.font = "bold " + Math.max(14, radius * 0.75) + "px 'Share Tech Mono', monospace";
-    ctx.fillStyle = '#EF9F27';
-    ctx.fillText(tgt.num, pixelX, pixelY - (radius * 0.22));
-    
-    ctx.font = "bold " + Math.max(10, radius * 0.52) + "px 'Share Tech Mono', monospace";
-    ctx.fillStyle = '#ffffff';
-    ctx.fillText(tgt.pct + '%', pixelX, pixelY + (radius * 0.38));
-  });
+  // Disegna i target rilevati se presenti
+  if (Array.isArray(currentTargetsGlobal)) {
+    currentTargetsGlobal.forEach(tgt => {
+      const pixelX = (tgt.x / 100) * cv.width;
+      const pixelY = (tgt.y / 100) * cv.height;
+      const radius = Math.max(20, cv.width * 0.022);
+      
+      ctx.beginPath();
+      ctx.arc(pixelX, pixelY, radius + 3, 0, 2 * Math.PI);
+      ctx.fillStyle = 'rgba(0,0,0,0.65)';
+      ctx.fill();
+      
+      ctx.beginPath();
+      ctx.arc(pixelX, pixelY, radius, 0, 2 * Math.PI);
+      ctx.fillStyle = '#1a1a18';
+      ctx.fill();
+      
+      ctx.lineWidth = Math.max(2.5, cv.width * 0.0035);
+      ctx.strokeStyle = '#EF9F27';
+      ctx.stroke();
+      
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.font = "bold " + Math.max(14, radius * 0.75) + "px 'Share Tech Mono', monospace";
+      ctx.fillStyle = '#EF9F27';
+      ctx.fillText(tgt.num, pixelX, pixelY - (radius * 0.22));
+      
+      ctx.font = "bold " + Math.max(10, radius * 0.52) + "px 'Share Tech Mono', monospace";
+      ctx.fillStyle = '#ffffff';
+      ctx.fillText(tgt.pct + '%', pixelX, pixelY + (radius * 0.38));
+    });
+  }
   
+  // Barra informativa inferiore (Watermark di tracciabilità geologica)
   ctx.fillStyle = 'rgba(0, 0, 0, 0.75)';
   ctx.fillRect(0, cv.height - 40, cv.width, 40);
   ctx.fillStyle = '#EF9F27';
@@ -906,6 +909,25 @@ function downloadAnnotatedPhoto() {
   const gpsTxt = document.getElementById('gpsCoords').textContent;
   ctx.fillText("AuriFind AI - Corrente: " + currentFlowDirection.toUpperCase() + " - GPS: " + gpsTxt, 16, cv.height - 15);
   
+  // TENTATIVO 1: Condivisione nativa tramite OS Share Sheet (Risolve iOS, Safari e Webview)
+  try {
+    const blob = await new Promise(resolve => cv.toBlob(resolve, 'image/jpeg', 0.9));
+    const file = new File([blob], 'aurifind_scan_' + new Date().toISOString().slice(0,10) + '.jpg', { type: 'image/jpeg' });
+    
+    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+      await navigator.share({
+        files: [file],
+        title: 'AuriFind AI Scan',
+        text: 'Analisi geologica e idraulica per ricerca oro.'
+      });
+      setStatus('Condivisione avviata con successo!', 'ok');
+      return;
+    }
+  } catch (shareErr) {
+    console.warn("Condivisione nativa non supportata o annullata dall'utente, provo fallback.");
+  }
+  
+  // TENTATIVO 2: Download programmatico standard (Ideale per Desktop/Android Chrome)
   try {
     const dataUrl = cv.toDataURL('image/jpeg', 0.9);
     const link = document.createElement('a');
@@ -914,14 +936,48 @@ function downloadAnnotatedPhoto() {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
-    showToast('Immagine esportata con successo', 'ok');
-  } catch(err) {
-    showToast('Errore durante il salvataggio locale', 'err');
+    setStatus('Immagine esportata!', 'ok');
+    showToast('Immagine scaricata correttamente!', 'ok');
+  } catch (downloadErr) {
+    console.error("Il download programmatico è fallito. Uso overlay di salvataggio prolungato.");
+    // TENTATIVO 3: Fallback visivo per Webview blindate (Tieni premuto per salvare)
+    const dataUrl = cv.toDataURL('image/jpeg', 0.9);
+    showSaveImageOverlay(dataUrl);
   }
 }
 
+// Mostra un overlay a schermo intero per consentire il salvataggio tramite pressione prolungata (long press)
+function showSaveImageOverlay(dataUrl) {
+  let overlay = document.getElementById('saveImageOverlay');
+  if (!overlay) {
+    overlay = document.createElement('div');
+    overlay.id = 'saveImageOverlay';
+    overlay.style.position = 'fixed';
+    overlay.style.inset = '0';
+    overlay.style.background = 'rgba(26,26,24,0.98)';
+    overlay.style.zIndex = '99999';
+    overlay.style.display = 'flex';
+    overlay.style.flexDirection = 'column';
+    overlay.style.alignItems = 'center';
+    overlay.style.justifyContent = 'center';
+    overlay.style.padding = '20px';
+    
+    overlay.innerHTML = `
+      <div style="text-align:center;color:#f0ede4;margin-bottom:15px;max-width:320px;">
+        <h3 style="color:var(--gold);margin-bottom:6px;font-size:16px;font-family:'Barlow',sans-serif;">Salva Foto</h3>
+        <p style="font-size:12.5px;opacity:0.8;line-height:1.45;font-family:'Barlow',sans-serif;">I browser di questa app non permettono il download automatico.<br><strong>Tieni premuto (pressione prolungata)</strong> sulla foto per salvarla nel rullino o condividerla.</p>
+      </div>
+      <img id="saveOverlayImg" src="" style="max-width:100%;max-height:65vh;border-radius:10px;border:1px solid var(--border);box-shadow:0 4px 20px rgba(0,0,0,0.6);"/>
+      <button onclick="document.getElementById('saveImageOverlay').style.display='none'" style="margin-top:20px;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:11px 24px;border-radius:9px;font-family:'Barlow',sans-serif;font-weight:600;font-size:13px;cursor:pointer;outline:none;">Chiudi</button>
+    `;
+    document.body.appendChild(overlay);
+  }
+  document.getElementById('saveOverlayImg').src = dataUrl;
+  overlay.style.display = 'flex';
+}
+
 function resetScanner(){
-  if(stream){stream.getTracks().forEach(t=>t.stop());stream=null;}
+  if(stream){stream.getTracks().forEach(t => t.stop()); stream=null;}
   document.getElementById('videoEl').style.display='none';
   document.getElementById('photoContainer').style.display='none';
   document.getElementById('visualTargetsOverlay').innerHTML = '';
@@ -943,13 +999,13 @@ function renderLog(){
     container.innerHTML=`<div class="log-hdr-row"><span class="log-hdr-title">Registro Scansioni</span></div><div class="log-empty"><i class="ti ti-notes-off" style="font-size:36px;opacity:.3"></i><p style="font-size:12px;opacity:.6;margin-top:6px">Nessuna voce in archivio</p></div>`;
     return;
   }
-  let h=`<div class="log-hdr-row"><span class="log-hdr-title">Scansioni effettuate (${sessionLog.length})</span><button class="log-clear" onclick="confirmClearLog()">Svuota</button></div><div style="height:10px"></div>`;
+  let h=`<div class="log-hdr-row"><span class="log-hdr-title">Scansioni effettuate (${sessionLog.length})</span><button class="log-clear" onclick="clearLogBtn()">Svuota</button></div><div style="height:10px"></div>`;
   sessionLog.slice().reverse().forEach(e=>{
     const c=pinColor(e.pct);
     h+=`<div class="log-item">
       <div class="log-bar" style="background:${c}"></div>
       <div class="log-body">
-        <div style="display:flex;justify-content:space-between;align-items:baseline;gap:6px"><span class="log-item-pct" style="color:${c}">${e.pct}%</span><span class="log-item-tier">${e.tier}</span></div>
+        <div style="display:flex;justify-content:between;align-items:baseline;gap:6px"><span class="log-item-pct" style="color:${c}">${e.pct}%</span><span class="log-item-tier">${e.tier}</span></div>
         <div class="log-item-rock">${e.rock}</div>
         <div class="log-item-coords">${e.lat}, ${e.lon}</div>
       </div>
@@ -959,31 +1015,25 @@ function renderLog(){
   container.innerHTML=h;
 }
 
-function confirmClearLog(){
-  showConfirm(
-    "Cancellare cronologia?", 
-    "Questa azione rimuoverà permanentemente tutte le scansioni registrate dal database locale dell'app.",
-    clearLog
-  );
-}
-
-function clearLog(){
-  sessionLog=[];
-  localStorage.removeItem('aurifind_log');
-  if(map){
-    scanMarkers.forEach(m=>map.removeLayer(m));
-    scanMarkers=[];
-    document.getElementById('mapEmpty').style.display='flex';
-  }
-  renderLog();
-  updateMapStats();
-  setStatus('Cronologia svuotata correttamente');
-  showToast('Database locale svuotato', 'ok');
+function clearLogBtn() {
+  showConfirm("Svuota Registro", "Sei sicuro di voler cancellare tutta la cronologia delle scansioni?", () => {
+    sessionLog=[];
+    localStorage.removeItem('aurifind_log');
+    if(map){
+      scanMarkers.forEach(m=>map.removeLayer(m));
+      scanMarkers=[];
+      document.getElementById('mapEmpty').style.display='flex';
+    }
+    renderLog();
+    updateMapStats();
+    setStatus('Cronologia svuotata');
+    showToast('Registro svuotato!', 'ok');
+  });
 }
 
 function exportGPX(){
   if(!sessionLog.length){
-    showToast('Nessun dato registrato nel log per l\'esportazione', 'err');
+    showToast("Nessun punto da esportare.", "err");
     return;
   }
   let gpx=`<?xml version="1.0" encoding="UTF-8"?><gpx version="1.1" creator="AuriFind"><wpt>`;
@@ -992,20 +1042,15 @@ function exportGPX(){
     gpx+=`<wpt lat="${e.lat}" lon="${e.lon}"><name>GoldPoint ${e.pct}%</name><desc>${e.rock}</desc></wpt>`;
   });
   gpx+=`</wpt></gpx>`;
-  
-  try {
-    const blob=new Blob([gpx],{type:'application/gpx+xml'});
-    const url=URL.createObjectURL(blob);
-    const a=document.createElement('a');
-    a.href=url;
-    a.download=`aurifind_${new Date().toISOString().slice(0,10)}.gpx`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    showToast('File GPX scaricato', 'ok');
-  } catch(err) {
-    showToast('Errore durante la compilazione del GPX', 'err');
-  }
+  const blob=new Blob([gpx],{type:'application/gpx+xml'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url;
+  a.download=`aurifind_${new Date().toISOString().slice(0,10)}.gpx`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  showToast('File GPX esportato!', 'ok');
 }
 </script>
 </body>
